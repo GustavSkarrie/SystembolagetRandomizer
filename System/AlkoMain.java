@@ -32,23 +32,7 @@ public class AlkoMain {
 
         List<Product> products = getData("data.json");
         System.out.println(products.size());
-        JFrame window = new JFrame("window");
-
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        JLabel test = new JLabel(products.get(0).getImage());
-        System.out.println(products.get(0).getImage().getIconHeight());
-        System.out.println(products.get(0).getImage().getIconWidth());
-        test.setBounds(50, 10, 1000, 1000);
-        test.setSize(100, 100);
-        test.setVisible(true);
-
-        window.add(new JPanel());
-        window.add(test);
-        window.setSize(420, 420);
-        window.setLayout(null);
-        window.setVisible(true);
-        window.pack();
+        Window window = new Window(420, 420, "Alkohol e gott");
     }
 
     public List<Product> getData(String fileName) {

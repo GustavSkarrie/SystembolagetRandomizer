@@ -13,8 +13,8 @@ headers = {
 try:
   for i in range(0, 10):
 	  response = requests.get(f'https://www.systembolaget.se/api/gateway/productsearch/search/?page={i}', headers=headers)
-	  data.extend(response.json()['products'])
-	  time.sleep(0.1)
+    data.extend(response.json()['products'])
+    time.sleep(0.1)
 finally:
   with open('data.json', 'w', encoding='utf-8') as file:
       json.dump(data, file, ensure_ascii=False, indent=4)
