@@ -1,10 +1,7 @@
 interface UIObject {
-    int x = 0;
-    int y = 0;
-    int width = 0;
-    int height = 0;
     
     abstract void Update();
-
-
+    abstract void setSize(int width, int height);
+    abstract void setSize(float size);
+    abstract void setPosition(int x, int y);
 }
