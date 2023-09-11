@@ -36,6 +36,7 @@ public class Window {
         objects = new ArrayList<>();
         //myWindow.pack();
 
+        /*
         try {
             URL url = new URL("https://product-cdn.systembolaget.se/productimages/507861/507861_400.png");
             BufferedImage bufferedImage = ImageIO.read(url);
@@ -46,6 +47,7 @@ public class Window {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        */
     }
 
     void Update() {
@@ -56,6 +58,9 @@ public class Window {
 
     void add(UIObject object) {
         objects.add(object);
+        myWindow.add(object.getObject());
+        System.out.println(object.toString());
+        Refresh();
     }
 
 

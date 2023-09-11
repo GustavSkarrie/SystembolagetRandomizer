@@ -33,6 +33,7 @@ public class AlkoMain {
         List<Product> products = getData("data.json");
         System.out.println(products.size());
         Window window = new Window(420, 420, "Alkohol e gott");
+        UIProduct temp = new UIProduct(products.get(4), null, window);
     }
 
     public List<Product> getData(String fileName) {
@@ -88,15 +89,14 @@ public class AlkoMain {
         return (String) object.get(key);
     }
 
-    ImageIcon getImage(JSONObject object, String key) throws IOException {
+    BufferedImage getImage(JSONObject object, String key) throws IOException {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
         URL url = new URL((String) o.get("imageUrl") + "_400.png");
         //URL url = new URL("https://cdn5.vectorstock.com/i/1000x1000/78/59/happy-grin-emoji-instant-messaging-icon-imag-vector-17067859.jpg");
         System.out.println(url);
         BufferedImage c = ImageIO.read(url);
-        ImageIcon image = new ImageIcon(c);
-        return image;
+        return c;
     }
 
     boolean hasImage(JSONObject object) {

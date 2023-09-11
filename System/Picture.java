@@ -44,6 +44,7 @@ public class Picture implements UIObject {
         //object.setSize(this.width, this.height);
     }
 
+    @Override
     public JLabel getObject() {
         return object;
     }
@@ -72,6 +73,16 @@ public class Picture implements UIObject {
         this.x = x;
         this.y = y;
         object.setBounds(this.x, this.y, width, height);
+    }
+
+    @Override
+    public int getWidth() {
+        return width;
+    }
+
+    @Override
+    public int getHeight() {
+        return height;
     }
     
 }

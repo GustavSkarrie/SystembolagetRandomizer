@@ -1,12 +1,14 @@
+import java.awt.image.BufferedImage;
+
 import javax.swing.ImageIcon;
 
 public class Product {
     String name;
     double price;
     String type;
-    ImageIcon image;
+    BufferedImage image;
 
-    public Product(String name, double price, String type, ImageIcon image) {
+    public Product(String name, double price, String type, BufferedImage image) {
         this.name = name;
         this.price = price;
         this.type = type;
@@ -25,7 +27,7 @@ public class Product {
         return type;
     }
 
-    ImageIcon getImage() {
+    BufferedImage getImage() {
         return image;
     }
 }
