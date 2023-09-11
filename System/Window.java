@@ -38,7 +38,6 @@ public class Window {
 
         try {
             URL url = new URL("https://product-cdn.systembolaget.se/productimages/507861/507861_400.png");
-            System.out.println(url);
             BufferedImage bufferedImage = ImageIO.read(url);
             Picture tempPic = new Picture(10, 10, 0.2f, bufferedImage);
             myWindow.add(tempPic.getObject());
