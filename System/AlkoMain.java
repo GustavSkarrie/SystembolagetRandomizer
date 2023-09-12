@@ -34,6 +34,7 @@ public class AlkoMain {
         System.out.println(products.size());
         Window window = new Window(420, 420, "Alkohol e gott");
         UIProduct temp = new UIProduct(products.get(4), null, window);
+
     }
 
     public List<Product> getData(String fileName) {
