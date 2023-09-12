@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
+import java.time.LocalDate;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -14,6 +14,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.text.html.HTMLDocument.BlockElement;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import org.json.simple.JSONArray;
@@ -36,12 +39,9 @@ public class AlkoMain {
         List<Product> products = getData("data.json");
         System.out.println(products.size());
         Window window = new Window(420, 420, "Alkohol e gott");
-<<<<<<< Updated upstream
         UIProduct temp = new UIProduct(products.get(4), null, window);
-=======
 
         //2011-10-01T00:00:00
->>>>>>> Stashed changes
     }
 
     public List<Product> getData(String fileName) {
@@ -55,7 +55,10 @@ public class AlkoMain {
             for (Object o: tempArray) {
                 JSONObject object = (JSONObject) o;
                 
-                if (!getBool(object, "isCompletelyOutOfStock") || !getBool(object, "isTemporaryOutOfStock"))
+                if (!getBool(object, "isCompletelyOutOfStock") ||
+                !getBool(object, "isTemporaryOutOfStock") ||
+                LocalDate.now().isBefore(getDate(object,"productLaunchDate")) ||
+                !getString(object, "categoryLevel1").equals("Alkoholfritt"))
                     if (hasImage(object))
                         products.add(createProduct(object));
             }
@@ -77,8 +80,17 @@ public class AlkoMain {
         var price = getDouble(object, "price");
         var type = getString(object, "categoryLevel1");
         var image = getImage(object, "images");
+        var date = getDate(object,"productLaunchDate");
+        return new Product(name, price, type, image, date);
+    }
 
-        return new Product(name, price, type, image);
+    LocalDate getDate(JSONObject object,String key) {
+        // Sätt ihop stringen här.
+        String str = getString(object, key).substring(0,10);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-d");
+        
+        LocalDate d1 = LocalDate.parse(str, dtf);
+        return d1;
     }
 
     double getDouble(JSONObject object, String key) {
