@@ -33,6 +33,7 @@ public class AlkoMain {
     List<Product> ol = new ArrayList<>();
     List<Product> sprit = new ArrayList<>();
     List<Product> cider = new ArrayList<>();
+    float deltaTime = 0;
 
     public static void main(String[] args) {
         AlkoMain running = new AlkoMain();
@@ -55,13 +56,7 @@ public class AlkoMain {
         UIProduct temp = new UIProduct(ol.get(0), "blue.png", window, 10, 50, 150, 150);
         setRandom(temp);
 
-        try {
-            FileWriter file = new FileWriter("output.json");
-            file.write(temp.getProduct().getJSON().toJSONString());
-            file.close();
-        } catch (Exception e) {
-
-        }
+        saveToJSON();
 
         //temp.setSize(150, 150);
 
@@ -118,6 +113,32 @@ public class AlkoMain {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void saveToJSON() {
+        try {
+            JSONArray array = new JSONArray();
+
+            FileWriter file = new FileWriter("output.json");
+
+            for (Product product : cider)
+                array.add(product.getJSON());
+
+            for (Product product : ol)
+                array.add(product.getJSON());
+
+            for (Product product : sprit)
+                array.add(product.getJSON());
+
+            for (Product product : vin)
+                array.add(product.getJSON());
+
+            file.write(array.toJSONString());
+            file.close();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
     }
 
     public void setRandom(UIProduct uiProduct) {
@@ -195,11 +216,11 @@ public class AlkoMain {
         return c;
     }
 
-    URL getULR(JSONObject object, String key) {
+    String getULR(JSONObject object, String key) {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
         try {
-            return new URL((String) o.get("imageUrl") + "_400.png");
+            return (String) o.get("imageUrl") + "_400.png";
         } catch (Exception e) {
             return null;
         }

@@ -13,6 +13,9 @@ public class UIProduct {
     Picture background;
     BufferedImage image;
 
+    int width;
+    int height;
+
     UIProduct(Product product, String file, Window aWindow, int x, int y, int width, int height) {
         this.product = product;
         
@@ -28,6 +31,9 @@ public class UIProduct {
 
         aWindow.add(picture);
         aWindow.add(background);
+
+        this.width = width;
+        this.height = height;
         //aWindow.Refresh();
     }
 
@@ -39,6 +45,8 @@ public class UIProduct {
             image = ImageIO.read(new File(file));
             background.setImage(image);
         } catch (IOException e) {}  
+
+        setSize(width, height);
     }
 
     public void setSize(int width, int height) {

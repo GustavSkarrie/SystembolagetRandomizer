@@ -13,9 +13,9 @@ public class Product {
     double price;
     String type;
     BufferedImage image;
-    URL url;
+    String url;
 
-    public Product(String name, double price, String type, BufferedImage image, URL url) {
+    public Product(String name, double price, String type, BufferedImage image, String url) {
         this.name = name;
         this.price = price;
         this.type = type;

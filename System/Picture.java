@@ -7,8 +7,8 @@ import javax.swing.JLabel;
 
 public class Picture implements UIObject {
 
-    int x;
-    int y;
+    float x;
+    float y;
     int width;
     int height;
     ImageIcon image;
@@ -51,7 +51,7 @@ public class Picture implements UIObject {
         this.image = new ImageIcon(tempImg);
 
         object.setIcon(image);
-        object.setBounds(x, y, width, height);
+        object.setBounds((int) x, (int) y, width, height);
     }
 
     @Override
@@ -79,10 +79,10 @@ public class Picture implements UIObject {
     }
 
     @Override
-    public void setPosition(int x, int y) {
+    public void setPosition(float x, float y) {
         this.x = x;
         this.y = y;
-        object.setBounds(this.x, this.y, width, height);
+        object.setBounds((int) this.x,(int) this.y, width, height);
     }
 
     public void setCenter(int x, int y) {
@@ -90,9 +90,9 @@ public class Picture implements UIObject {
     }
 
     public Dimension getCenter() {
-        int x = this.x + width/2;
-        int y = this.y + height/2;
-        return new Dimension(x, y);
+        float x = this.x + width/2;
+        float y = this.y + height/2;
+        return new Dimension((int) x, (int) y);
     }
 
     @Override
@@ -106,10 +106,10 @@ public class Picture implements UIObject {
     }
 
     @Override
-    public void move(int x, int y) {
+    public void move(float x, float y) {
         this.x += x;
         this.y += y;
-        object.setBounds(this.x, this.y, width, height);
+        object.setBounds((int) this.x, (int) this.y, width, height);
     }
     
 }
