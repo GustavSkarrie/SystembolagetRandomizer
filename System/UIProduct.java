@@ -31,6 +31,16 @@ public class UIProduct {
         //aWindow.Refresh();
     }
 
+    public void setProduct(Product product, String file) {
+        this.product = product;
+        picture.setImage(product.getImage());
+
+        try {
+            image = ImageIO.read(new File(file));
+            background.setImage(image);
+        } catch (IOException e) {}  
+    }
+
     public void setSize(int width, int height) {
         background.setSize(width, height);
         picture.setSize((int)((height - 30) * ((float)picture.getWidth() / (float)picture.getHeight())), height - 30);
@@ -41,5 +51,9 @@ public class UIProduct {
     public void move(int x, int y) {
         background.move(x, y);
         picture.move(x, y);
+    }
+
+    public Product getProduct() {
+        return product;
     }
 }

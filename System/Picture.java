@@ -45,6 +45,15 @@ public class Picture implements UIObject {
         //object.setSize(this.width, this.height);
     }
 
+    public void setImage(BufferedImage bufferedImage) {
+        this.bufferedImage = bufferedImage;
+        Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        this.image = new ImageIcon(tempImg);
+
+        object.setIcon(image);
+        object.setBounds(x, y, width, height);
+    }
+
     @Override
     public JLabel getObject() {
         return object;

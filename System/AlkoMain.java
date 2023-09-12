@@ -1,4 +1,5 @@
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.awt.image.BufferedImage;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -6,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.time.LocalDate;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -14,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.text.html.HTMLDocument.BlockElement;
 import java.net.URL;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +29,11 @@ import org.json.simple.parser.ParseException;
 
 
 public class AlkoMain {
+    List<Product> vin = new ArrayList<>();
+    List<Product> ol = new ArrayList<>();
+    List<Product> sprit = new ArrayList<>();
+    List<Product> cider = new ArrayList<>();
+
     public static void main(String[] args) {
         AlkoMain running = new AlkoMain();
         running.run();
@@ -36,21 +44,36 @@ public class AlkoMain {
         String s = "Tjena";
         s = s.substring(0, 4) + "Ja";
         System.out.println(s);
-        List<Product> products = getData("data.json");
-        System.out.println(products.size());
+        getData("data.json");
+
+        System.out.println("Vin: " + vin.size());
+        System.out.println("Ol: " + ol.size());
+        System.out.println("Sprit: " + sprit.size());
+        System.out.println("Cider: " + cider.size());
+
         Window window = new Window(1200, 600, "Alkohol e gott");
-        UIProduct temp = new UIProduct(products.get(4), "blue.png", window, 10, 50, 150, 150);
+        UIProduct temp = new UIProduct(ol.get(0), "blue.png", window, 10, 50, 150, 150);
+        setRandom(temp);
+
+        try {
+            FileWriter file = new FileWriter("output.json");
+            file.write(temp.getProduct().getJSON().toJSONString());
+            file.close();
+        } catch (Exception e) {
+
+        }
+
         //temp.setSize(150, 150);
 
         boolean running = true;
 
         while(running) {
-            temp.move(1, 0);
+            //temp.move(1, 0);
             window.Refresh();
         }
     }
 
-    public List<Product> getData(String fileName) {
+    public void getData(String fileName) {
         
         List<Product> products = new ArrayList<>();
         JSONParser parser = new JSONParser();
@@ -64,30 +87,68 @@ public class AlkoMain {
                 if (!getBool(object, "isCompletelyOutOfStock") ||
                 !getBool(object, "isTemporaryOutOfStock") ||
                 LocalDate.now().isBefore(getDate(object,"productLaunchDate")) ||
-                !getString(object, "categoryLevel1").equals("Alkoholfritt"))
-                    if (hasImage(object))
-                        products.add(createProduct(object));
+                !getString(object, "categoryLevel1").equals("Alkoholfritt")) {
+                    if (hasImage(object)) {
+                        Product product = createProduct(object);
+
+                        switch(product.getType()){
+                            case "Vin":
+                                vin.add(product);
+                                break;
+
+                            case "Al":
+                                ol.add(product);
+                                break;
+
+                            case "Cider & blanddrycker":
+                                cider.add(product);
+                                break;
+
+                            case "Sprit":
+                                sprit.add(product);
+                                break;
+
+                            default:
+                                System.out.println(product.getType());
+                                break;
+                        }
+                    } 
+                }
             }
-
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
-        return products;
+    public void setRandom(UIProduct uiProduct) {
+        Random rand = new Random();
+        float temp = rand.nextFloat();
+
+        if (temp < 0.50) { //öl 50 procent chans
+            Product pro = ol.get(rand.nextInt(ol.size()));
+            uiProduct.setProduct(pro, "blue.png");
+        }
+        else if (temp < 0.85) { //cider 35 procent chans
+            Product pro = cider.get(rand.nextInt(cider.size()));
+            uiProduct.setProduct(pro, "pink.png");
+        }
+        else if (temp < 0.95) { //vin 10 procent risk
+            Product pro = vin.get(rand.nextInt(vin.size()));
+            uiProduct.setProduct(pro, "red.png");
+        }
+        else { //sprit 5 procent risk
+            Product pro = sprit.get(rand.nextInt(sprit.size()));
+            uiProduct.setProduct(pro, "yellow.png");
+        }
     }
 
     public Product createProduct(JSONObject object) throws IOException {
-        var name = getString(object, "productNameBold") + " - " + getString(object, "Imperial Cuvée Organic");
+        var name = getString(object, "productNameBold") + " - " + getString(object, "productNameThin");
         var price = getDouble(object, "price");
         var type = getString(object, "categoryLevel1");
         var image = getImage(object, "images");
-        var date = getDate(object,"productLaunchDate");
-        return new Product(name, price, type, image, date);
+        var ulr = getULR(object, "images");
+        return new Product(name, price, type, image, ulr);
     }
 
     LocalDate getDate(JSONObject object,String key) {
@@ -113,7 +174,15 @@ public class AlkoMain {
     }
 
     String getString(JSONObject object, String key) {
-        return (String) object.get(key);
+
+        try {
+            String temp = Normalizer.normalize((String) object.get(key), Normalizer.Form.NFD);
+            temp = temp.replaceAll("[^\\p{ASCII}]", "");
+            return temp;
+        }
+        catch (Exception e) {
+            return (String) object.get(key);
+        }
     }
 
     BufferedImage getImage(JSONObject object, String key) throws IOException {
@@ -124,6 +193,16 @@ public class AlkoMain {
         System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
+    }
+
+    URL getULR(JSONObject object, String key) {
+        JSONArray a = (JSONArray) object.get(key);
+        JSONObject o = (JSONObject) a.get(0);
+        try {
+            return new URL((String) o.get("imageUrl") + "_400.png");
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     boolean hasImage(JSONObject object) {

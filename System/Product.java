@@ -1,23 +1,26 @@
 import java.awt.image.BufferedImage;
+import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
 
+import org.json.simple.JSONObject;
+
 public class Product {
     String name;
     double price;
     String type;
     BufferedImage image;
-    LocalDate date;
+    URL url;
 
-    public Product(String name, double price, String type, BufferedImage image,LocalDate date) {
+    public Product(String name, double price, String type, BufferedImage image, URL url) {
         this.name = name;
         this.price = price;
         this.type = type;
         this.image = image;
-        this.date = date;
+        this.url = url;
         LocalDate.now();
     }
 
@@ -37,8 +40,13 @@ public class Product {
         return image;
     }
 
-    LocalDate getDate() {
-        this.date.now();
-        return date;
+    public JSONObject getJSON() {
+        JSONObject object = new JSONObject();
+        object.put("name", name);
+        object.put("price", price);
+        object.put("type", type);
+        object.put("type", type);
+        object.put("url", url);
+        return object;
     }
 }
