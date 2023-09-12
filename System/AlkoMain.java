@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.text.html.HTMLDocument.BlockElement;
 import java.net.URL;
+import java.util.Date;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -29,12 +30,18 @@ public class AlkoMain {
 
     public void run() {
         System.out.println("running");
-
+        String s = "Tjena";
+        s = s.substring(0, 4) + "Ja";
+        System.out.println(s);
         List<Product> products = getData("data.json");
         System.out.println(products.size());
         Window window = new Window(420, 420, "Alkohol e gott");
+<<<<<<< Updated upstream
         UIProduct temp = new UIProduct(products.get(4), null, window);
+=======
 
+        //2011-10-01T00:00:00
+>>>>>>> Stashed changes
     }
 
     public List<Product> getData(String fileName) {
@@ -52,6 +59,7 @@ public class AlkoMain {
                     if (hasImage(object))
                         products.add(createProduct(object));
             }
+
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
