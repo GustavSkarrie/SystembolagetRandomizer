@@ -50,6 +50,9 @@ public class UIProduct {
     }
 
     public void setSize(int width, int height) {
+        this.width = width;
+        this.height = height;
+
         background.setSize(width, height);
         picture.setSize((int)((height - 30) * ((float)picture.getWidth() / (float)picture.getHeight())), height - 30);
         Dimension dim = background.getCenter();

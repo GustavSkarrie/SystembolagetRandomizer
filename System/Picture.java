@@ -47,6 +47,8 @@ public class Picture implements UIObject {
 
     public void setImage(BufferedImage bufferedImage) {
         this.bufferedImage = bufferedImage;
+        width = (int)(height * (float) bufferedImage.getWidth() / (float) bufferedImage.getHeight());
+        
         Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         this.image = new ImageIcon(tempImg);
 

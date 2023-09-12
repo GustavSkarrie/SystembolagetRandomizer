@@ -53,7 +53,7 @@ public class AlkoMain {
         System.out.println("Cider: " + cider.size());
 
         Window window = new Window(1200, 600, "Alkohol e gott");
-        UIProduct temp = new UIProduct(ol.get(0), "blue.png", window, 10, 50, 150, 150);
+        UIProduct temp = new UIProduct(ol.get(0), "image/blue.png", window, 10, 50, 150, 150);
         setRandom(temp);
 
         saveToJSON();
@@ -147,19 +147,23 @@ public class AlkoMain {
 
         if (temp < 0.50) { //öl 50 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));
-            uiProduct.setProduct(pro, "blue.png");
+
+            if (pro.name.contains("Norrlands"))
+                uiProduct.setProduct(pro, "image/rainbow.png");
+            else
+                uiProduct.setProduct(pro, "image/blue.png");
         }
         else if (temp < 0.85) { //cider 35 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
-            uiProduct.setProduct(pro, "pink.png");
+            uiProduct.setProduct(pro, "image/pink.png");
         }
         else if (temp < 0.95) { //vin 10 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
-            uiProduct.setProduct(pro, "red.png");
+            uiProduct.setProduct(pro, "image/red.png");
         }
         else { //sprit 5 procent risk
             Product pro = sprit.get(rand.nextInt(sprit.size()));
-            uiProduct.setProduct(pro, "yellow.png");
+            uiProduct.setProduct(pro, "image/yellow.png");
         }
     }
 
