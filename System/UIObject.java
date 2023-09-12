@@ -6,6 +6,7 @@ interface UIObject {
     abstract void setSize(int width, int height);
     abstract void setSize(float size);
     abstract void setPosition(int x, int y);
+    abstract void move(int x, int y);
     abstract int getWidth();
     abstract int getHeight();
     abstract JLabel getObject();

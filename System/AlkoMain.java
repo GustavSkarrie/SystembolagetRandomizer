@@ -38,10 +38,16 @@ public class AlkoMain {
         System.out.println(s);
         List<Product> products = getData("data.json");
         System.out.println(products.size());
-        Window window = new Window(420, 420, "Alkohol e gott");
-        UIProduct temp = new UIProduct(products.get(4), null, window);
+        Window window = new Window(1200, 600, "Alkohol e gott");
+        UIProduct temp = new UIProduct(products.get(4), "blue.png", window, 10, 50, 150, 150);
+        //temp.setSize(150, 150);
 
-        //2011-10-01T00:00:00
+        boolean running = true;
+
+        while(running) {
+            temp.move(1, 0);
+            window.Refresh();
+        }
     }
 
     public List<Product> getData(String fileName) {

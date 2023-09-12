@@ -59,13 +59,17 @@ public class Window {
     void add(UIObject object) {
         objects.add(object);
         myWindow.add(object.getObject());
-        System.out.println(object.toString());
-        Refresh();
+        //Refresh();
     }
 
 
     void Refresh() {
+        myWindow.invalidate();
+        myWindow.validate();
+        myWindow.repaint();
+        /* 
         myWindow.setVisible(false);
         myWindow.setVisible(true);
+        */
     }
 }

@@ -1,5 +1,6 @@
 import java.awt.image.BufferedImage;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.swing.ImageIcon;
@@ -36,8 +37,8 @@ public class Product {
         return image;
     }
 
-    LocalDateTime getDate() {
-        this.date.now()
+    LocalDate getDate() {
+        this.date.now();
         return date;
     }
 }

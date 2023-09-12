@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
@@ -75,6 +76,16 @@ public class Picture implements UIObject {
         object.setBounds(this.x, this.y, width, height);
     }
 
+    public void setCenter(int x, int y) {
+        setPosition(x - width/2, y - height/2);
+    }
+
+    public Dimension getCenter() {
+        int x = this.x + width/2;
+        int y = this.y + height/2;
+        return new Dimension(x, y);
+    }
+
     @Override
     public int getWidth() {
         return width;
@@ -83,6 +94,13 @@ public class Picture implements UIObject {
     @Override
     public int getHeight() {
         return height;
+    }
+
+    @Override
+    public void move(int x, int y) {
+        this.x += x;
+        this.y += y;
+        object.setBounds(this.x, this.y, width, height);
     }
     
 }
