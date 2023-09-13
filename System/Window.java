@@ -59,9 +59,9 @@ public class Window {
     void add(UIObject object) {
         objects.add(object);
         myWindow.add(object.getObject());
+        JPanel panel = new JPanel();
         //Refresh();
     }
-
 
     void Refresh() {
         myWindow.invalidate();

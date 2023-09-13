@@ -38,12 +38,14 @@ public class AlkoMain {
     float lastTime = 0;
     float deltaTime = 0;
     float curSpeed = 0;
+    float timer = 0;
 
     ImageIcon blue;
     ImageIcon pink;
     ImageIcon red;
     ImageIcon yellow;
     ImageIcon rainbow;
+    ImageIcon line;
 
     static int size = 190;
 
@@ -69,6 +71,7 @@ public class AlkoMain {
         red = loadImage("image/red.png", size, size);
         yellow = loadImage("image/yellow.png", size, size);
         rainbow = loadImage("image/rainbow.png", size, size);
+        line = loadImage("image/line.png", size + 20, size + 20);
 
         Window window = new Window(1200, 600, "Alkohol e gott");
         //UIProduct temp = new UIProduct(ol.get(0), "image/blue.png", window, 10, 50, 150, 150);
@@ -78,19 +81,30 @@ public class AlkoMain {
 
         //temp.setSize(150, 150);
 
+        Picture middle = new Picture(600, 300, size + 20, size + 20, line);
+        middle.setCenter(1200/2, 600/2);
+        window.add(middle);
+
         boolean running = true;
         List<UIProduct> products = roll(window);
 
         lastTime = System.nanoTime();
-        
+
         while(running) {
             float time = System.nanoTime();
             deltaTime = (time - lastTime) / 1000000;
 
-            
+            if (timer > 0)
+                System.out.println("time: " + timer);
+            //System.out.println("speed: " + curSpeed);
+
+            timer -= deltaTime / 1000;
+
+            if (timer < 0 && curSpeed != 0)
+                curSpeed = clamp((curSpeed - 0.0002f) / 1.0003f , 0, 100);
 
             for (UIProduct uiProduct : products) {
-                if (uiProduct.Update(0.5f * deltaTime))
+                if (uiProduct.Update(curSpeed * deltaTime))
                     setRandom(uiProduct);
             }
 
@@ -177,16 +191,27 @@ public class AlkoMain {
 
     }
 
-    public List<UIProduct> roll(Window aWindow){
+    public float clamp(float value, float min, float max) {
+        if (value > max)
+            return max;
+        if (value < min)
+            return min;
+
+        return value;
+    }
+
+    public List<UIProduct> roll(Window aWindow) {
+        Random rand = new Random();
         List<UIProduct> products = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            UIProduct product = new UIProduct(ol.get(0), blue, aWindow, 2000 + (size + 10) * i, 50, size, size);
+            UIProduct product = new UIProduct(ol.get(0), blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
             setRandom(product);
             products.add(product);
         }
 
-        curSpeed = 1;
+        curSpeed = 2.5f;
+        timer = rand.nextFloat(6) + 5;
         return products;
     }
 
