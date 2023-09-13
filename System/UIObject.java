@@ -9,5 +9,6 @@ interface UIObject {
     abstract void move(float x, float y);
     abstract int getWidth();
     abstract int getHeight();
+    abstract float getX();
     abstract JLabel getObject();
 }

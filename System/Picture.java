@@ -15,42 +15,42 @@ public class Picture implements UIObject {
     JLabel object;
     BufferedImage bufferedImage;
 
-    Picture(int x, int y, int width, int height, BufferedImage image) {
+    Picture(int x, int y, int width, int height, ImageIcon image) {
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.bufferedImage = image;
+        this.image = image;
 
-        Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        this.image = new ImageIcon(tempImg);
+        //Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        //this.image = new ImageIcon(tempImg);
 
         object = new JLabel(this.image);
         object.setBounds(x, y, width, height);
         //object.setSize(this.width, this.height);
     }
 
-    Picture(int x, int y, float size, BufferedImage image) {
+    Picture(int x, int y, float size, ImageIcon image) {
         this.x = x;
         this.y = y;
-        this.width = (int)(image.getWidth() * size);
-        this.height = (int)(image.getHeight() * size);
-        this.bufferedImage = image;
+        //this.width = (int)(image.getWidth() * size);
+        //this.height = (int)(image.getHeight() * size);
+        this.image = image;
 
-        Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        this.image = new ImageIcon(tempImg);
+        //Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        //this.image = new ImageIcon(tempImg);
 
         object = new JLabel(this.image);
         object.setBounds(x, y, width, height);
         //object.setSize(this.width, this.height);
     }
 
-    public void setImage(BufferedImage bufferedImage) {
-        this.bufferedImage = bufferedImage;
-        width = (int)(height * (float) bufferedImage.getWidth() / (float) bufferedImage.getHeight());
+    public void setImage(ImageIcon image) {
+        this.image = image;
+        //width = (int)(height * (float) bufferedImage.getWidth() / (float) bufferedImage.getHeight());
         
-        Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        this.image = new ImageIcon(tempImg);
+        //Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        //this.image = new ImageIcon(tempImg);
 
         object.setIcon(image);
         object.setBounds((int) x, (int) y, width, height);
@@ -71,6 +71,7 @@ public class Picture implements UIObject {
         Image tempImg = bufferedImage.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         image = new ImageIcon(tempImg);
         object.setIcon(image);
+        object.setBounds((int) x, (int) y, width, height);
     }
 
     @Override
@@ -112,6 +113,11 @@ public class Picture implements UIObject {
         this.x += x;
         this.y += y;
         object.setBounds((int) this.x, (int) this.y, width, height);
+    }
+
+    @Override
+    public float getX() {
+        return x;
     }
     
 }

@@ -12,14 +12,16 @@ public class Product {
     String name;
     double price;
     String type;
-    BufferedImage image;
+    ImageIcon image;
+    BufferedImage buffImage;
     String url;
 
-    public Product(String name, double price, String type, BufferedImage image, String url) {
+    public Product(String name, double price, String type, ImageIcon image, BufferedImage buffImage, String url) {
         this.name = name;
         this.price = price;
         this.type = type;
         this.image = image;
+        this.buffImage = buffImage;
         this.url = url;
         LocalDate.now();
     }
@@ -36,7 +38,7 @@ public class Product {
         return type;
     }
 
-    BufferedImage getImage() {
+    ImageIcon getImage() {
         return image;
     }
 

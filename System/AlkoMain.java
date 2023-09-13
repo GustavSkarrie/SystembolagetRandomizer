@@ -1,6 +1,7 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.awt.Image;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -33,7 +35,17 @@ public class AlkoMain {
     List<Product> ol = new ArrayList<>();
     List<Product> sprit = new ArrayList<>();
     List<Product> cider = new ArrayList<>();
+    float lastTime = 0;
     float deltaTime = 0;
+    float curSpeed = 0;
+
+    ImageIcon blue;
+    ImageIcon pink;
+    ImageIcon red;
+    ImageIcon yellow;
+    ImageIcon rainbow;
+
+    static int size = 190;
 
     public static void main(String[] args) {
         AlkoMain running = new AlkoMain();
@@ -52,20 +64,44 @@ public class AlkoMain {
         System.out.println("Sprit: " + sprit.size());
         System.out.println("Cider: " + cider.size());
 
+        blue = loadImage("image/blue.png", size, size);
+        pink = loadImage("image/pink.png", size, size);
+        red = loadImage("image/red.png", size, size);
+        yellow = loadImage("image/yellow.png", size, size);
+        rainbow = loadImage("image/rainbow.png", size, size);
+
         Window window = new Window(1200, 600, "Alkohol e gott");
-        UIProduct temp = new UIProduct(ol.get(0), "image/blue.png", window, 10, 50, 150, 150);
-        setRandom(temp);
+        //UIProduct temp = new UIProduct(ol.get(0), "image/blue.png", window, 10, 50, 150, 150);
+        //setRandom(temp);
 
         saveToJSON();
 
         //temp.setSize(150, 150);
 
         boolean running = true;
+        List<UIProduct> products = roll(window);
 
+        lastTime = System.nanoTime();
+        
         while(running) {
+            float time = System.nanoTime();
+            deltaTime = (time - lastTime) / 1000000;
+
+            
+
+            for (UIProduct uiProduct : products) {
+                if (uiProduct.Update(0.5f * deltaTime))
+                    setRandom(uiProduct);
+            }
+
             //temp.move(1, 0);
             window.Refresh();
+            lastTime = time;
         }
+    }
+
+    public float getDeltaTime() {
+        return deltaTime;
     }
 
     public void getData(String fileName) {
@@ -141,6 +177,19 @@ public class AlkoMain {
 
     }
 
+    public List<UIProduct> roll(Window aWindow){
+        List<UIProduct> products = new ArrayList<>();
+
+        for (int i = 0; i < 20; i++) {
+            UIProduct product = new UIProduct(ol.get(0), blue, aWindow, 2000 + (size + 10) * i, 50, size, size);
+            setRandom(product);
+            products.add(product);
+        }
+
+        curSpeed = 1;
+        return products;
+    }
+
     public void setRandom(UIProduct uiProduct) {
         Random rand = new Random();
         float temp = rand.nextFloat();
@@ -149,21 +198,21 @@ public class AlkoMain {
             Product pro = ol.get(rand.nextInt(ol.size()));
 
             if (pro.name.contains("Norrlands"))
-                uiProduct.setProduct(pro, "image/rainbow.png");
+                uiProduct.setProduct(pro, rainbow);
             else
-                uiProduct.setProduct(pro, "image/blue.png");
+                uiProduct.setProduct(pro, blue);
         }
         else if (temp < 0.85) { //cider 35 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
-            uiProduct.setProduct(pro, "image/pink.png");
+            uiProduct.setProduct(pro, pink);
         }
         else if (temp < 0.95) { //vin 10 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
-            uiProduct.setProduct(pro, "image/red.png");
+            uiProduct.setProduct(pro, red);
         }
         else { //sprit 5 procent risk
             Product pro = sprit.get(rand.nextInt(sprit.size()));
-            uiProduct.setProduct(pro, "image/yellow.png");
+            uiProduct.setProduct(pro, yellow);
         }
     }
 
@@ -171,9 +220,10 @@ public class AlkoMain {
         var name = getString(object, "productNameBold") + " - " + getString(object, "productNameThin");
         var price = getDouble(object, "price");
         var type = getString(object, "categoryLevel1");
-        var image = getImage(object, "images");
+        var buffImage = getBuffImage(object, "images");
+        var image = getImage(buffImage);
         var ulr = getULR(object, "images");
-        return new Product(name, price, type, image, ulr);
+        return new Product(name, price, type, image, buffImage, ulr);
     }
 
     LocalDate getDate(JSONObject object,String key) {
@@ -210,7 +260,7 @@ public class AlkoMain {
         }
     }
 
-    BufferedImage getImage(JSONObject object, String key) throws IOException {
+    BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
         URL url = new URL((String) o.get("imageUrl") + "_400.png");
@@ -218,6 +268,11 @@ public class AlkoMain {
         System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
+    }
+
+    ImageIcon getImage(BufferedImage buffImage) {
+        ImageIcon image = new ImageIcon(buffImage.getScaledInstance((size - 30) * buffImage.getWidth() / buffImage.getHeight(), size - 30, Image.SCALE_FAST));
+        return image;
     }
 
     String getULR(JSONObject object, String key) {
@@ -237,5 +292,16 @@ public class AlkoMain {
             return true;
         
         return false;
+    }
+
+    public ImageIcon loadImage(String file, int width, int height) {
+
+        try {
+            BufferedImage b = ImageIO.read(new File(file));
+            return new ImageIcon(b.getScaledInstance(width, height, Image.SCALE_FAST)); 
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 }
