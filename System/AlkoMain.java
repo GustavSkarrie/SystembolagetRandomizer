@@ -56,9 +56,6 @@ public class AlkoMain {
 
     public void run() {
         System.out.println("running");
-        String s = "Tjena";
-        s = s.substring(0, 4) + "Ja";
-        System.out.println(s);
         getData("data.json");
 
         System.out.println("Vin: " + vin.size());
@@ -165,6 +162,16 @@ public class AlkoMain {
         }
     }
 
+    public Product loadProduct(JSONObject object) throws IOException {
+        var name = getString(object, "name");
+        var price = getDouble(object, "price");
+        var type = getString(object, "type");
+        var buffImage = getBuffImage(object, "url");
+        var image = getImage(buffImage);
+
+        return new Product(name, price, type, image, buffImage, null);
+    }
+
     public void saveToJSON() {
         try {
             JSONArray array = new JSONArray();
@@ -245,7 +252,7 @@ public class AlkoMain {
         var name = getString(object, "productNameBold") + " - " + getString(object, "productNameThin");
         var price = getDouble(object, "price");
         var type = getString(object, "categoryLevel1");
-        var buffImage = getBuffImage(object, "images");
+        var buffImage = getBuffImage(object, "images", "imageURL");
         var image = getImage(buffImage);
         var ulr = getULR(object, "images");
         return new Product(name, price, type, image, buffImage, ulr);
@@ -285,11 +292,17 @@ public class AlkoMain {
         }
     }
 
-    BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
+    BufferedImage getBuffImage(JSONObject object, String key, String key2) throws IOException {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
-        URL url = new URL((String) o.get("imageUrl") + "_400.png");
-        //URL url = new URL("https://cdn5.vectorstock.com/i/1000x1000/78/59/happy-grin-emoji-instant-messaging-icon-imag-vector-17067859.jpg");
+        URL url = new URL((String) o.get(key2) + "_400.png");
+        System.out.println(url);
+        BufferedImage c = ImageIO.read(url);
+        return c;
+    }
+
+    BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
+        URL url = new URL((String) object.get(key) + "_400.png");
         System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
