@@ -3,6 +3,7 @@ import java.util.Vector;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -10,6 +11,7 @@ import javax.swing.JPanel;
 import org.json.simple.parser.ParseException;
 
 import java.net.URL;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.util.List;
@@ -27,7 +29,7 @@ public class Window {
         myWindow = new JFrame(windowName);
 
         myWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myWindow.add(new JPanel());
+        //myWindow.add(new JPanel());
         myWindow.setSize(width, height);
         myWindow.setLayout(null);
         myWindow.setVisible(true);
@@ -59,8 +61,25 @@ public class Window {
     void add(UIObject object) {
         objects.add(object);
         myWindow.add(object.getObject());
-        JPanel panel = new JPanel();
         //Refresh();
+    }
+
+    void add(JButton button) {
+        myWindow.add(button);
+    }
+
+    void removeAll() {
+        myWindow.removeAll();
+        myWindow.validate();
+    }
+
+    void remove(UIObject object) {
+        objects.remove(object);
+        myWindow.remove(object.getObject());
+    }
+
+    void removeComp(Component aComponent) {
+        myWindow.remove(aComponent);
     }
 
     void Refresh() {

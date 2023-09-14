@@ -110,4 +110,9 @@ public class UIProduct {
     public Product getProduct() {
         return product;
     }
+
+    public void remove(Window aWindow) {
+        aWindow.remove(background);
+        aWindow.remove(picture);
+    }
 }

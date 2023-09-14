@@ -12,6 +12,7 @@ import java.util.Random;
 import java.time.LocalDate;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -24,6 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.awt.Desktop;
 import java.awt.Image;
+import java.awt.event.ActionListener;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -40,6 +42,12 @@ public class AlkoMain {
     float deltaTime = 0;
     float curSpeed = 0;
     float timer = 0;
+
+    List<UIProduct> products = new ArrayList<>();
+    boolean rolling = false;
+
+    JButton rollButton;
+    JButton refreshButton;
 
     ImageIcon blue;
     ImageIcon pink;
@@ -58,8 +66,8 @@ public class AlkoMain {
 
     public void run() {
         System.out.println("running");
-        refreshData();
-        //load();
+        //refreshData();
+        load();
 
         System.out.println("Vin: " + vin.size());
         System.out.println("Ol: " + ol.size());
@@ -74,20 +82,12 @@ public class AlkoMain {
         line = loadImage("image/line.png", size + 20, size + 20);
 
         Window window = new Window(1200, 600, "Alkohol e gott");
-        //UIProduct temp = new UIProduct(ol.get(0), "image/blue.png", window, 10, 50, 150, 150);
-        //setRandom(temp);
 
+        
 
-
-        //temp.setSize(150, 150);
-
-        Picture middle = new Picture(600, 300, size + 20, size + 20, line);
-        middle.setCenter(1200/2, 600/2);
-        window.add(middle);
+        createButtons(window);
 
         boolean running = true;
-        boolean rolling = true;
-        List<UIProduct> products = roll(window);
 
         lastTime = System.nanoTime();
 
@@ -109,6 +109,7 @@ public class AlkoMain {
                     Product pro = getMiddle(products);
                     System.out.println(pro.getLink());
                     openLink(pro.getLink());
+                    createButtons(window);
                     rolling = false;
                 }
                     
@@ -128,13 +129,36 @@ public class AlkoMain {
         return deltaTime;
     }
 
-    public void refreshData() {
+    public void createButtons(Window aWindow) {
+        rollButton = new JButton("Roll");
+        rollButton.setBounds(1200/2 - 205, 600/2 + 110, 200, 70);
+        rollButton.addActionListener((actionListener) -> {roll(aWindow);});
+
+        refreshButton = new JButton("Refresh");
+        refreshButton.setBounds(1200/2 + 5, 600/2 + 110, 200, 70);
+        refreshButton.addActionListener((actionListener) -> {refreshData(aWindow);});
+
+        aWindow.add(rollButton);
+        aWindow.add(refreshButton);
+    }
+
+    public void refreshData(Window aWindow) {
+        aWindow.removeComp(rollButton);
+        aWindow.removeComp(refreshButton);
+        removeProducts(aWindow);
+
         try {
+            vin = new ArrayList<>();
+            ol = new ArrayList<>();
+            cider = new ArrayList<>();
+            sprit = new ArrayList<>();
+
             Process p = Runtime.getRuntime().exec("python system.py");
             System.out.println(p.isAlive());
             p.waitFor();
             getData("data.json");
             saveToJSON();
+            createButtons(aWindow);
 
         } catch (Exception e) {
             // TODO: handle exception
@@ -143,7 +167,6 @@ public class AlkoMain {
     }
 
     public void getData(String fileName) {
-        Random rand = new Random();
         JSONParser parser = new JSONParser();
 
         try {
@@ -151,10 +174,6 @@ public class AlkoMain {
 
             for (Object o: tempArray) {
                 JSONObject object = (JSONObject) o;
-                float random = rand.nextFloat();
-
-                if (getString(object, "categoryLevel1") == "Vin" && random < 0.1)
-                    continue;
                 
                 if (!getBool(object, "isCompletelyOutOfStock") ||
                 !getBool(object, "isTemporaryOutOfStock") ||
@@ -165,6 +184,9 @@ public class AlkoMain {
 
                         switch(product.getType()){
                             case "Vin":
+                                if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
+                                    break;
+
                                 vin.add(product);
                                 break;
 
@@ -177,6 +199,9 @@ public class AlkoMain {
                                 break;
 
                             case "Sprit":
+                                if (product.getPrice() > 380)
+                                    break;
+
                                 sprit.add(product);
                                 break;
 
@@ -295,8 +320,27 @@ public class AlkoMain {
         return value;
     }
 
-    public List<UIProduct> roll(Window aWindow) {
+    public void removeProducts(Window aWindow) {
+        for (UIProduct product : products) {
+            product.remove(aWindow);
+        }
+
+        products = new ArrayList<>();
+    }
+
+    public void roll(Window aWindow) {
         Random rand = new Random();
+        aWindow.removeComp(rollButton);
+        aWindow.removeComp(refreshButton);
+        removeProducts(aWindow);
+
+        rollButton = null;
+        refreshButton = null;
+
+        Picture middle = new Picture(600, 300, size + 20, size + 20, line);
+        middle.setCenter(1200/2, 600/2);
+        aWindow.add(middle);
+
         List<UIProduct> products = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
@@ -307,7 +351,8 @@ public class AlkoMain {
 
         curSpeed = 2.5f;
         timer = rand.nextFloat(2) + 2;
-        return products;
+        rolling = true;
+        this.products = products;
     }
 
     public void setRandom(UIProduct uiProduct) {
