@@ -1,8 +1,6 @@
 import json
 import requests
-import time
-
-start = time.time()
+from time import sleep
 
 data = []
 headers = {
@@ -11,13 +9,10 @@ headers = {
 }
 
 try:
-  for i in range(0, 10):
-	  response = requests.get(f'https://www.systembolaget.se/api/gateway/productsearch/search/?page={i}', headers=headers)
+  for i in range(40, 50):
+    response = requests.get(f'https://www.systembolaget.se/api/gateway/productsearch/search/?page={i}', headers=headers)
     data.extend(response.json()['products'])
-    time.sleep(0.1)
+    sleep(0.1)
 finally:
   with open('data.json', 'w', encoding='utf-8') as file:
       json.dump(data, file, ensure_ascii=False, indent=4)
-
-end = time.time()
-print(end - start)

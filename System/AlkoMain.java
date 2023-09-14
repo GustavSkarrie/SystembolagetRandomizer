@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.awt.Desktop;
 import java.awt.Image;
 
 import org.json.simple.JSONArray;
@@ -50,13 +51,15 @@ public class AlkoMain {
     static int size = 190;
 
     public static void main(String[] args) {
+        System.setProperty("file.encoding", "UTF-8");
         AlkoMain running = new AlkoMain();
         running.run();
     }
 
     public void run() {
         System.out.println("running");
-        getData("data.json");
+        refreshData();
+        //load();
 
         System.out.println("Vin: " + vin.size());
         System.out.println("Ol: " + ol.size());
@@ -74,7 +77,7 @@ public class AlkoMain {
         //UIProduct temp = new UIProduct(ol.get(0), "image/blue.png", window, 10, 50, 150, 150);
         //setRandom(temp);
 
-        saveToJSON();
+
 
         //temp.setSize(150, 150);
 
@@ -83,6 +86,7 @@ public class AlkoMain {
         window.add(middle);
 
         boolean running = true;
+        boolean rolling = true;
         List<UIProduct> products = roll(window);
 
         lastTime = System.nanoTime();
@@ -91,18 +95,27 @@ public class AlkoMain {
             float time = System.nanoTime();
             deltaTime = (time - lastTime) / 1000000;
 
-            if (timer > 0)
-                System.out.println("time: " + timer);
-            //System.out.println("speed: " + curSpeed);
+            if (rolling) {
+                //if (timer > 0)
+                //    System.out.println("time: " + timer);
+                //System.out.println("speed: " + curSpeed);
 
-            timer -= deltaTime / 1000;
+                timer -= deltaTime / 1000;
 
-            if (timer < 0 && curSpeed != 0)
-                curSpeed = clamp((curSpeed - 0.0002f) / 1.0003f , 0, 100);
+                if (timer < 0 && curSpeed != 0)
+                    curSpeed = clamp((curSpeed - 0.0003f) / 1.0005f , 0, 100);
 
-            for (UIProduct uiProduct : products) {
-                if (uiProduct.Update(curSpeed * deltaTime))
-                    setRandom(uiProduct);
+                if (curSpeed == 0) {
+                    Product pro = getMiddle(products);
+                    System.out.println(pro.getLink());
+                    openLink(pro.getLink());
+                    rolling = false;
+                }
+                    
+                for (UIProduct uiProduct : products) {
+                    if (uiProduct.Update(curSpeed * deltaTime))
+                        setRandom(uiProduct);
+                }
             }
 
             //temp.move(1, 0);
@@ -115,9 +128,22 @@ public class AlkoMain {
         return deltaTime;
     }
 
+    public void refreshData() {
+        try {
+            Process p = Runtime.getRuntime().exec("python system.py");
+            System.out.println(p.isAlive());
+            p.waitFor();
+            getData("data.json");
+            saveToJSON();
+
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+
+    }
+
     public void getData(String fileName) {
-        
-        List<Product> products = new ArrayList<>();
+        Random rand = new Random();
         JSONParser parser = new JSONParser();
 
         try {
@@ -125,6 +151,10 @@ public class AlkoMain {
 
             for (Object o: tempArray) {
                 JSONObject object = (JSONObject) o;
+                float random = rand.nextFloat();
+
+                if (getString(object, "categoryLevel1") == "Vin" && random < 0.1)
+                    continue;
                 
                 if (!getBool(object, "isCompletelyOutOfStock") ||
                 !getBool(object, "isTemporaryOutOfStock") ||
@@ -138,7 +168,7 @@ public class AlkoMain {
                                 vin.add(product);
                                 break;
 
-                            case "Al":
+                            case "Ol":
                                 ol.add(product);
                                 break;
 
@@ -162,14 +192,72 @@ public class AlkoMain {
         }
     }
 
+    public void load() {
+        JSONParser parser = new JSONParser();
+
+        try {
+            JSONArray tempArray = (JSONArray) parser.parse(new FileReader("output.json"));
+
+            for (Object object : tempArray) {
+                JSONObject jsonObject = (JSONObject) object;
+
+                Product product = loadProduct(jsonObject);
+
+                switch(product.getType()){
+                    case "Vin":
+                        vin.add(product);
+                        break;
+
+                    case "Ol":
+                        ol.add(product);
+                        break;
+
+                    case "Cider & blanddrycker":
+                        cider.add(product);
+                        break;
+
+                    case "Sprit":
+                        sprit.add(product);
+                        break;
+                }
+            }
+
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+    }
+
     public Product loadProduct(JSONObject object) throws IOException {
         var name = getString(object, "name");
         var price = getDouble(object, "price");
         var type = getString(object, "type");
+        var id = getString(object, "id");
         var buffImage = getBuffImage(object, "url");
         var image = getImage(buffImage);
 
-        return new Product(name, price, type, image, buffImage, null);
+        return new Product(name, price, type, id, image, buffImage, null);
+    }
+
+    public Product getMiddle(List<UIProduct> products) {
+        for (UIProduct product : products) {
+            if (product.isInside(1200/2))
+                return product.getProduct();
+        }
+
+        return null;
+    }
+
+    void openLink(String link) {
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                URL url = new URL(link);
+                desktop.browse(url.toURI());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void saveToJSON() {
@@ -218,7 +306,7 @@ public class AlkoMain {
         }
 
         curSpeed = 2.5f;
-        timer = rand.nextFloat(6) + 5;
+        timer = rand.nextFloat(2) + 2;
         return products;
     }
 
@@ -249,13 +337,14 @@ public class AlkoMain {
     }
 
     public Product createProduct(JSONObject object) throws IOException {
-        var name = getString(object, "productNameBold") + " - " + getString(object, "productNameThin");
+        var name = getString(object, "productNameBold");
         var price = getDouble(object, "price");
         var type = getString(object, "categoryLevel1");
+        var id = getString(object, "productNumber");
         var buffImage = getBuffImage(object, "images", "imageUrl");
         var image = getImage(buffImage);
         var ulr = getULR(object, "images");
-        return new Product(name, price, type, image, buffImage, ulr);
+        return new Product(name, price, type, id, image, buffImage, ulr);
     }
 
     LocalDate getDate(JSONObject object,String key) {
@@ -283,7 +372,7 @@ public class AlkoMain {
     String getString(JSONObject object, String key) {
 
         try {
-            String temp = Normalizer.normalize((String) object.get(key), Normalizer.Form.NFD);
+            String temp = Normalizer.normalize(object.get(key).toString(), Normalizer.Form.NFD);
             temp = temp.replaceAll("[^\\p{ASCII}]", "");
             return temp;
         }
@@ -302,7 +391,7 @@ public class AlkoMain {
     }
 
     BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
-        URL url = new URL((String) object.get(key) + "_400.png");
+        URL url = new URL((String) object.get(key));
         System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;

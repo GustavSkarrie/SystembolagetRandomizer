@@ -79,6 +79,13 @@ public class UIProduct {
         //setSize(width, height);
     }
 
+    public boolean isInside(int x) {
+        if (x >= this.background.getX() - 5 && x <= this.background.getX() + this.width + 5)
+            return true;
+
+        return false;
+    }
+
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;

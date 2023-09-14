@@ -12,14 +12,16 @@ public class Product {
     String name;
     double price;
     String type;
+    String id;
     ImageIcon image;
     BufferedImage buffImage;
     String url;
 
-    public Product(String name, double price, String type, ImageIcon image, BufferedImage buffImage, String url) {
+    public Product(String name, double price, String type, String id, ImageIcon image, BufferedImage buffImage, String url) {
         this.name = name;
         this.price = price;
         this.type = type;
+        this.id = id;
         this.image = image;
         this.buffImage = buffImage;
         this.url = url;
@@ -47,8 +49,20 @@ public class Product {
         object.put("name", name);
         object.put("price", price);
         object.put("type", type);
-        object.put("type", type);
+        object.put("id", id);
         object.put("url", url);
         return object;
+    }
+
+    public String getLink() {
+        String type = this.type;
+        type = type.replaceAll("&","-");
+        type = type.replaceAll("\\s", "");
+
+        String name = this.name;
+        name = name.replaceAll("\\s", "-");
+
+        String link = "https://www.systembolaget.se/produkt/" + type + "/" + name + "-" + id; 
+        return link;
     }
 }
