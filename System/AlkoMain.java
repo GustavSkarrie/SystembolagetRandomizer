@@ -252,7 +252,7 @@ public class AlkoMain {
         var name = getString(object, "productNameBold") + " - " + getString(object, "productNameThin");
         var price = getDouble(object, "price");
         var type = getString(object, "categoryLevel1");
-        var buffImage = getBuffImage(object, "images", "imageURL");
+        var buffImage = getBuffImage(object, "images", "imageUrl");
         var image = getImage(buffImage);
         var ulr = getULR(object, "images");
         return new Product(name, price, type, image, buffImage, ulr);
