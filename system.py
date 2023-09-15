@@ -9,9 +9,10 @@ headers = {
 }
 
 try:
-  for i in range(40, 50):
+  for i in range(0, 1000):
     response = requests.get(f'https://www.systembolaget.se/api/gateway/productsearch/search/?page={i}', headers=headers)
     data.extend(response.json()['products'])
+    print(str(i + 1) + "/1000", flush=True)
     sleep(0.1)
 finally:
   with open('data.json', 'w', encoding='utf-8') as file:

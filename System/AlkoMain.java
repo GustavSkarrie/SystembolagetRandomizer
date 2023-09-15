@@ -1,10 +1,12 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -131,11 +133,11 @@ public class AlkoMain {
 
     public void createButtons(Window aWindow) {
         rollButton = new JButton("Roll");
-        rollButton.setBounds(1200/2 - 205, 600/2 + 110, 200, 70);
+        rollButton.setBounds(1200/2 - 100, 600/2 + 120, 200, 70);
         rollButton.addActionListener((actionListener) -> {roll(aWindow);});
 
-        refreshButton = new JButton("Refresh");
-        refreshButton.setBounds(1200/2 + 5, 600/2 + 110, 200, 70);
+        refreshButton = new JButton("Refresh (> 10 min)");
+        refreshButton.setBounds(10, 10, 160, 50);
         refreshButton.addActionListener((actionListener) -> {refreshData(aWindow);});
 
         aWindow.add(rollButton);
@@ -153,14 +155,38 @@ public class AlkoMain {
             cider = new ArrayList<>();
             sprit = new ArrayList<>();
 
-            Process p = Runtime.getRuntime().exec("python system.py");
-            System.out.println(p.isAlive());
+            //ProcessBuilder pb = new ProcessBuilder().command("python system.py");
+            //final Process p = pb.start();
+
+            //Process p = Runtime.getRuntime().exec("python system.py");
+            
+            final Process p = new ProcessBuilder("python", "system.py").start();
+            try(InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
+                int c;
+                while((c = isr.read()) >= 0) {
+                    System.out.print((char) c);
+                    System.out.flush();
+                }
+            }
+
+            /*
+            BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            //BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+            String line = "";
+            while ((line = output.readLine()) != null) {
+                System.out.println(line);
+            }
+            */
+
+            System.out.println("Running python: " + p.isAlive());
             p.waitFor();
             getData("data.json");
             saveToJSON();
             createButtons(aWindow);
 
         } catch (Exception e) {
+            System.out.println("wrong");
             // TODO: handle exception
         }
 
@@ -171,8 +197,12 @@ public class AlkoMain {
 
         try {
             JSONArray tempArray = (JSONArray) parser.parse(new FileReader(fileName));
+            int i = 0;
 
             for (Object o: tempArray) {
+                System.out.println(i + "/" + tempArray.size());
+                i++;
+
                 JSONObject object = (JSONObject) o;
                 
                 if (!getBool(object, "isCompletelyOutOfStock") ||
@@ -222,9 +252,13 @@ public class AlkoMain {
 
         try {
             JSONArray tempArray = (JSONArray) parser.parse(new FileReader("output.json"));
+            int i = 0;
 
             for (Object object : tempArray) {
                 JSONObject jsonObject = (JSONObject) object;
+
+                System.out.println(i + "/" + tempArray.size());
+                i++;
 
                 Product product = loadProduct(jsonObject);
 
@@ -430,14 +464,14 @@ public class AlkoMain {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
         URL url = new URL((String) o.get(key2) + "_400.png");
-        System.out.println(url);
+        //System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
     }
 
     BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
         URL url = new URL((String) object.get(key));
-        System.out.println(url);
+        //System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
     }
