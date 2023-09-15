@@ -137,6 +137,8 @@ public class AlkoMain {
         removeButton = new JButton("Remove product");
         removeButton.setBounds(160 + 10, 10, 160, 50);
         removeButton.addActionListener((actionListener) -> {removeMiddle(aWindow);});
+
+        aWindow.add(removeButton);
     }
 
     public void createButtons(Window aWindow) {
@@ -155,6 +157,10 @@ public class AlkoMain {
     public void refreshData(Window aWindow) {
         aWindow.removeComp(rollButton);
         aWindow.removeComp(refreshButton);
+
+        if (removeButton != null)
+            aWindow.removeComp(removeButton);
+
         removeProducts(aWindow);
 
         try {
@@ -392,10 +398,15 @@ public class AlkoMain {
         Random rand = new Random();
         aWindow.removeComp(rollButton);
         aWindow.removeComp(refreshButton);
+
+        if (removeButton != null)
+            aWindow.removeComp(removeButton);
+
         removeProducts(aWindow);
 
         rollButton = null;
         refreshButton = null;
+        removeButton = null;
 
         Picture middle = new Picture(600, 300, size + 20, size + 20, line);
         middle.setCenter(1200/2, 600/2);
@@ -427,15 +438,15 @@ public class AlkoMain {
             else
                 uiProduct.setProduct(pro, blue);
         }
-        else if (temp < 0.75) { //cider 35 procent chans
+        else if (temp < 0.70) { //cider 30 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
             uiProduct.setProduct(pro, pink);
         }
-        else if (temp < 0.9) { //vin 15 procent risk
+        else if (temp < 0.88) { //vin 18 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
             uiProduct.setProduct(pro, red);
         }
-        else { //sprit 10 procent risk
+        else { //sprit 12 procent risk
             Product pro = sprit.get(rand.nextInt(sprit.size()));
             uiProduct.setProduct(pro, yellow);
         }
