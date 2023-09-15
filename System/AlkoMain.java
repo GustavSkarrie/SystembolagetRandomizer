@@ -50,6 +50,7 @@ public class AlkoMain {
 
     JButton rollButton;
     JButton refreshButton;
+    JButton removeButton;
 
     ImageIcon blue;
     ImageIcon pink;
@@ -111,6 +112,7 @@ public class AlkoMain {
                     Product pro = getMiddle(products);
                     System.out.println(pro.getLink());
                     openLink(pro.getLink());
+                    createRemoveButton(window);
                     createButtons(window);
                     rolling = false;
                 }
@@ -131,12 +133,18 @@ public class AlkoMain {
         return deltaTime;
     }
 
+    public void createRemoveButton(Window aWindow) {
+        removeButton = new JButton("Remove product");
+        removeButton.setBounds(160 + 10, 10, 160, 50);
+        removeButton.addActionListener((actionListener) -> {removeMiddle(aWindow);});
+    }
+
     public void createButtons(Window aWindow) {
         rollButton = new JButton("Roll");
         rollButton.setBounds(1200/2 - 100, 600/2 + 120, 200, 70);
         rollButton.addActionListener((actionListener) -> {roll(aWindow);});
 
-        refreshButton = new JButton("Refresh (> 10 min)");
+        refreshButton = new JButton("Refresh (> 1h)");
         refreshButton.setBounds(10, 10, 160, 50);
         refreshButton.addActionListener((actionListener) -> {refreshData(aWindow);});
 
@@ -286,15 +294,33 @@ public class AlkoMain {
         }
     }
 
+    public void removeMiddle(Window aWindow) {
+        Product product = getMiddle(products);
+
+        aWindow.removeComp(rollButton);
+        aWindow.removeComp(refreshButton);
+        aWindow.removeComp(removeButton);
+        removeProducts(aWindow);
+
+        vin.remove(product);
+        ol.remove(product);
+        cider.remove(product);
+        sprit.remove(product);
+
+        saveToJSON();
+        createButtons(aWindow);
+    }
+
     public Product loadProduct(JSONObject object) throws IOException {
         var name = getString(object, "name");
         var price = getDouble(object, "price");
         var type = getString(object, "type");
         var id = getString(object, "id");
+        var url = getString(object, "url");
         var buffImage = getBuffImage(object, "url");
         var image = getImage(buffImage);
 
-        return new Product(name, price, type, id, image, buffImage, null);
+        return new Product(name, price, type, id, image, buffImage, url);
     }
 
     public Product getMiddle(List<UIProduct> products) {
@@ -393,7 +419,7 @@ public class AlkoMain {
         Random rand = new Random();
         float temp = rand.nextFloat();
 
-        if (temp < 0.50) { //öl 50 procent chans
+        if (temp < 0.40) { //öl 40 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));
 
             if (pro.name.contains("Norrlands"))
@@ -401,15 +427,15 @@ public class AlkoMain {
             else
                 uiProduct.setProduct(pro, blue);
         }
-        else if (temp < 0.85) { //cider 35 procent chans
+        else if (temp < 0.75) { //cider 35 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
             uiProduct.setProduct(pro, pink);
         }
-        else if (temp < 0.95) { //vin 10 procent risk
+        else if (temp < 0.9) { //vin 15 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
             uiProduct.setProduct(pro, red);
         }
-        else { //sprit 5 procent risk
+        else { //sprit 10 procent risk
             Product pro = sprit.get(rand.nextInt(sprit.size()));
             uiProduct.setProduct(pro, yellow);
         }
