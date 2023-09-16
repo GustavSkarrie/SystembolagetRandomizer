@@ -65,4 +65,9 @@ public class Product {
         String link = "https://www.systembolaget.se/produkt/" + type + "/" + name + "-" + id; 
         return link;
     }
+
+    public int getId() {
+        int i = Integer.parseInt(id);
+        return i;
+    }
 }

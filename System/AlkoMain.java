@@ -308,13 +308,17 @@ public class AlkoMain {
         aWindow.removeComp(removeButton);
         removeProducts(aWindow);
 
-        vin.remove(product);
-        ol.remove(product);
-        cider.remove(product);
-        sprit.remove(product);
+        removeAll(product);
 
         saveToJSON();
         createButtons(aWindow);
+    }
+
+    public void removeAll(Product aProduct) {
+        vin.removeIf((element) -> (element.getId() == aProduct.getId()));
+        ol.removeIf((element) -> (element.getId() == aProduct.getId()));
+        cider.removeIf((element) -> (element.getId() == aProduct.getId()));
+        sprit.removeIf((element) -> (element.getId() == aProduct.getId()));
     }
 
     public Product loadProduct(JSONObject object) throws IOException {
