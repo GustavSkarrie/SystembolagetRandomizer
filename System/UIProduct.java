@@ -26,26 +26,38 @@ public class UIProduct {
         this.width = width;
         this.height = height;
         background = new Picture(x, y, width, height, icon);
-
-        /* 
-        try {
-            BufferedImage i = ImageIO.read(new File(file));
-            image = new i.getScaledInstance(190, 190, Image.SCALE_SMOOTH);
-            background = new Picture(x, y, width, height, image);
-        } catch (IOException e) {}     
-        */
         
         Dimension dim = background.getCenter();
         picture = new Picture(x, y, width, height, product.getImage());
         picture.setCenter((int)dim.getWidth(), (int)dim.getHeight());
-        //setSize(width, height);
 
         aWindow.add(picture);
         aWindow.add(background);
 
         this.width = width;
         this.height = height;
-        //aWindow.Refresh();
+    }
+
+    UIProduct(Product product, ImageIcon icon, Window aWindow) {
+        this.product = product;
+        this.image = icon;
+    }
+
+    public void init(Window window,int x, int y, int width, int height){
+                //this.width = width;
+        this.height = height;
+        background = new Picture(x, y, width, height, image);
+        
+        Dimension dim = background.getCenter();
+        picture = new Picture(x, y, width, height, product.getImage());
+        picture.setCenter((int)dim.getWidth(), (int)dim.getHeight());
+        
+        this.width = width;
+        this.height = height;
+
+        window.add(picture);
+        window.add(background);
+
     }
 
     public boolean Update (float speed) {

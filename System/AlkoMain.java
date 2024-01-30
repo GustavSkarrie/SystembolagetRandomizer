@@ -1,45 +1,35 @@
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.time.LocalDate;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.text.html.HTMLDocument.BlockElement;
 import java.net.URL;
 import java.text.Normalizer;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.awt.Desktop;
 import java.awt.Image;
-import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 
 public class AlkoMain {
-    List<Product> vin = new ArrayList<>();
-    List<Product> ol = new ArrayList<>();
-    List<Product> sprit = new ArrayList<>();
-    List<Product> cider = new ArrayList<>();
+    HashMap<Product, JSONObject> vin = new HashMap<>();
+    HashMap<Product, JSONObject> ol = new HashMap<>();
+    HashMap<Product, JSONObject> sprit = new HashMap<>();
+    HashMap<Product, JSONObject> cider = new HashMap<>();
     float lastTime = 0;
     float deltaTime = 0;
     float curSpeed = 0;
@@ -59,7 +49,11 @@ public class AlkoMain {
     ImageIcon rainbow;
     ImageIcon line;
 
+    Product defultProduct;
+
     static int size = 190;
+
+    boolean isFirst = true;
 
     public static void main(String[] args) {
         System.setProperty("file.encoding", "UTF-8");
@@ -94,6 +88,7 @@ public class AlkoMain {
 
         lastTime = System.nanoTime();
 
+        System.out.println("Loading init list");
         while(running) {
             float time = System.nanoTime();
             deltaTime = (time - lastTime) / 1000000;
@@ -119,14 +114,18 @@ public class AlkoMain {
                     
                 for (UIProduct uiProduct : products) {
                     if (uiProduct.Update(curSpeed * deltaTime))
-                        setRandom(uiProduct);
+                        uiProduct = getRandomUIProduct();
                 }
             }
 
-            //temp.move(1, 0);
             window.Refresh();
             lastTime = time;
         }
+    }
+
+    private UIProduct getRandomUIProduct(){
+        Random rand = new Random();
+        return products.get(rand.nextInt(products.size()));
     }
 
     public float getDeltaTime() {
@@ -164,15 +163,10 @@ public class AlkoMain {
         removeProducts(aWindow);
 
         try {
-            vin = new ArrayList<>();
-            ol = new ArrayList<>();
-            cider = new ArrayList<>();
-            sprit = new ArrayList<>();
-
-            //ProcessBuilder pb = new ProcessBuilder().command("python system.py");
-            //final Process p = pb.start();
-
-            //Process p = Runtime.getRuntime().exec("python system.py");
+            vin = new HashMap<>();
+            ol = new HashMap<>();
+            cider = new HashMap<>();
+            sprit = new HashMap<>();
             
             final Process p = new ProcessBuilder("python", "system.py").start();
             try(InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
@@ -182,16 +176,6 @@ public class AlkoMain {
                     System.out.flush();
                 }
             }
-
-            /*
-            BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            //BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-            String line = "";
-            while ((line = output.readLine()) != null) {
-                System.out.println(line);
-            }
-            */
 
             System.out.println("Running python: " + p.isAlive());
             p.waitFor();
@@ -231,22 +215,22 @@ public class AlkoMain {
                                 if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
                                     break;
 
-                                vin.add(product);
+                                vin.put(product, object);
                                 break;
 
                             case "Ol":
-                                ol.add(product);
+                                ol.put(product, object);
                                 break;
 
                             case "Cider & blanddrycker":
-                                cider.add(product);
+                                cider.put(product, object);
                                 break;
 
                             case "Sprit":
                                 if (product.getPrice() > 380)
                                     break;
 
-                                sprit.add(product);
+                                sprit.put(product, object);
                                 break;
 
                             default:
@@ -276,21 +260,23 @@ public class AlkoMain {
 
                 Product product = loadProduct(jsonObject);
 
+                if(i == 1)
+                    defultProduct = product;
                 switch(product.getType()){
                     case "Vin":
-                        vin.add(product);
+                        vin.put(product, jsonObject);
                         break;
 
                     case "Ol":
-                        ol.add(product);
+                        ol.put(product, jsonObject);
                         break;
 
                     case "Cider & blanddrycker":
-                        cider.add(product);
+                        cider.put(product, jsonObject);
                         break;
 
                     case "Sprit":
-                        sprit.add(product);
+                        sprit.put(product, jsonObject);
                         break;
                 }
             }
@@ -315,10 +301,21 @@ public class AlkoMain {
     }
 
     public void removeAll(Product aProduct) {
-        vin.removeIf((element) -> (element.getId() == aProduct.getId()));
+        removeFromMap(vin, aProduct);
+        removeFromMap(ol, aProduct);
+        removeFromMap(cider, aProduct);
+        removeFromMap(sprit, aProduct);
+        /*vin.removeIf((element) -> (element.getId() == aProduct.getId()));
         ol.removeIf((element) -> (element.getId() == aProduct.getId()));
         cider.removeIf((element) -> (element.getId() == aProduct.getId()));
-        sprit.removeIf((element) -> (element.getId() == aProduct.getId()));
+        sprit.removeIf((element) -> (element.getId() == aProduct.getId()));*/
+    }
+
+    private void removeFromMap(HashMap<Product, JSONObject> map, Product aProduct){
+        for(Map.Entry<Product, JSONObject> entry : map.entrySet()){
+            if(entry.getKey().getId() == aProduct.getId())
+                vin.remove(aProduct);//might need to be entry
+        }
     }
 
     public Product loadProduct(JSONObject object) throws IOException {
@@ -327,10 +324,11 @@ public class AlkoMain {
         var type = getString(object, "type");
         var id = getString(object, "id");
         var url = getString(object, "url");
-        var buffImage = getBuffImage(object, "url");
-        var image = getImage(buffImage);
+        //var buffImage = getBuffImage(object, "url");
+        //var image = getImage(buffImage);
 
-        return new Product(name, price, type, id, image, buffImage, url);
+        //return new Product(name, price, type, id, image, buffImage, url);
+        return new Product(name, price, type, id, url);
     }
 
     public Product getMiddle(List<UIProduct> products) {
@@ -360,18 +358,18 @@ public class AlkoMain {
             JSONArray array = new JSONArray();
 
             FileWriter file = new FileWriter("output.json");
+            //Map.Entry<String, String> entry : map.entrySet()
+            for (Map.Entry<Product, JSONObject> entry : cider.entrySet())
+                array.add(entry.getKey().getJSON());
 
-            for (Product product : cider)
-                array.add(product.getJSON());
+            for (Map.Entry<Product, JSONObject> entry : ol.entrySet())
+                array.add(entry.getKey().getJSON());
 
-            for (Product product : ol)
-                array.add(product.getJSON());
+            for (Map.Entry<Product, JSONObject> entry : vin.entrySet())
+                array.add(entry.getKey().getJSON());
 
-            for (Product product : sprit)
-                array.add(product.getJSON());
-
-            for (Product product : vin)
-                array.add(product.getJSON());
+            for (Map.Entry<Product, JSONObject> entry : sprit.entrySet())
+                array.add(entry.getKey().getJSON());
 
             file.write(array.toJSONString());
             file.close();
@@ -395,7 +393,7 @@ public class AlkoMain {
             product.remove(aWindow);
         }
 
-        products = new ArrayList<>();
+        //products = new ArrayList<>();
     }
 
     public void roll(Window aWindow) {
@@ -417,12 +415,13 @@ public class AlkoMain {
         aWindow.add(middle);
 
         List<UIProduct> products = new ArrayList<>();
-
-        for (int i = 0; i < 20; i++) {
-            UIProduct product = new UIProduct(ol.get(0), blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
+        for (int i = 0; i < 250; i++) {
+            UIProduct product = new UIProduct(defultProduct, blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
             setRandom(product);
             products.add(product);
+            System.out.println(i + " : " + 250);
         }
+        
 
         curSpeed = 2.5f;
         timer = rand.nextFloat(2) + 2;
@@ -430,28 +429,47 @@ public class AlkoMain {
         this.products = products;
     }
 
+    private void setPic(Product product){
+        try{
+            var buffImage = getBuffImage(product.getJSON(), "url");
+            var image = getImage(buffImage);
+            product.setBufferedImage(buffImage);
+            product.setImage(image);
+        }catch(IOException e){
+            System.out.println("did not find pic");
+        }
+    }
+
     public void setRandom(UIProduct uiProduct) {
         Random rand = new Random();
         float temp = rand.nextFloat();
+        List<Product> keyList;
 
         if (temp < 0.40) { //öl 40 procent chans
-            Product pro = ol.get(rand.nextInt(ol.size()));
-
+            keyList = new ArrayList<>(ol.keySet());
+            Product pro = keyList.get(rand.nextInt(keyList.size()));            
+            setPic(pro);
             if (pro.name.contains("Norrlands"))
                 uiProduct.setProduct(pro, rainbow);
             else
                 uiProduct.setProduct(pro, blue);
         }
         else if (temp < 0.70) { //cider 30 procent chans
-            Product pro = cider.get(rand.nextInt(cider.size()));
+            keyList = new ArrayList<>(cider.keySet());
+            Product pro = keyList.get(rand.nextInt(keyList.size()));
+            setPic(pro);
             uiProduct.setProduct(pro, pink);
         }
         else if (temp < 0.88) { //vin 18 procent risk
-            Product pro = vin.get(rand.nextInt(vin.size()));
+            keyList = new ArrayList<>(vin.keySet());
+            Product pro = keyList.get(rand.nextInt(keyList.size()));
+            setPic(pro);
             uiProduct.setProduct(pro, red);
         }
         else { //sprit 12 procent risk
-            Product pro = sprit.get(rand.nextInt(sprit.size()));
+            keyList = new ArrayList<>(sprit.keySet());
+            Product pro = keyList.get(rand.nextInt(keyList.size()));
+            setPic(pro);
             uiProduct.setProduct(pro, yellow);
         }
     }

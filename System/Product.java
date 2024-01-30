@@ -28,6 +28,22 @@ public class Product {
         LocalDate.now();
     }
 
+    public Product(String name, double price, String type, String id, String url) {
+        this.name = name;
+        this.price = price;
+        this.type = type;
+        this.id = id;
+        this.url = url;
+        LocalDate.now();
+    }
+
+    public void setImage(ImageIcon image){
+        this.image = image;
+    }
+    public void setBufferedImage(BufferedImage buffImage){
+        this.buffImage = buffImage;
+    }
+
     String getName() {
         return name;
     }
