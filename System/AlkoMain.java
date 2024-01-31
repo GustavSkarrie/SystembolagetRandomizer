@@ -63,7 +63,6 @@ public class AlkoMain {
 
     public void run() {
         System.out.println("running");
-        //refreshData();
         load();
 
         System.out.println("Vin: " + vin.size());
@@ -94,10 +93,6 @@ public class AlkoMain {
             deltaTime = (time - lastTime) / 1000000;
 
             if (rolling) {
-                //if (timer > 0)
-                //    System.out.println("time: " + timer);
-                //System.out.println("speed: " + curSpeed);
-
                 timer -= deltaTime / 1000;
 
                 if (timer < 0 && curSpeed != 0)
@@ -314,7 +309,7 @@ public class AlkoMain {
     private void removeFromMap(HashMap<Product, JSONObject> map, Product aProduct){
         for(Map.Entry<Product, JSONObject> entry : map.entrySet()){
             if(entry.getKey().getId() == aProduct.getId())
-                vin.remove(aProduct);//might need to be entry
+                vin.remove(aProduct);
         }
     }
 
@@ -324,10 +319,6 @@ public class AlkoMain {
         var type = getString(object, "type");
         var id = getString(object, "id");
         var url = getString(object, "url");
-        //var buffImage = getBuffImage(object, "url");
-        //var image = getImage(buffImage);
-
-        //return new Product(name, price, type, id, image, buffImage, url);
         return new Product(name, price, type, id, url);
     }
 
@@ -358,7 +349,6 @@ public class AlkoMain {
             JSONArray array = new JSONArray();
 
             FileWriter file = new FileWriter("output.json");
-            //Map.Entry<String, String> entry : map.entrySet()
             for (Map.Entry<Product, JSONObject> entry : cider.entrySet())
                 array.add(entry.getKey().getJSON());
 
@@ -523,14 +513,12 @@ public class AlkoMain {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
         URL url = new URL((String) o.get(key2) + "_400.png");
-        //System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
     }
 
     BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
         URL url = new URL((String) object.get(key));
-        //System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
     }
