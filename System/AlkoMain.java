@@ -18,7 +18,6 @@ import java.text.Normalizer;
 import java.time.format.DateTimeFormatter;
 import java.awt.Desktop;
 import java.awt.Image;
-import java.awt.event.KeyListener;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -405,7 +404,7 @@ public class AlkoMain {
         aWindow.add(middle);
 
         List<UIProduct> products = new ArrayList<>();
-        for (int i = 0; i < 250; i++) {
+        for (int i = 0; i < 250; i++) {//25 works
             UIProduct product = new UIProduct(defultProduct, blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
             setRandom(product);
             products.add(product);
