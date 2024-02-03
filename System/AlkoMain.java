@@ -5,9 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.time.LocalDate;
 import javax.imageio.ImageIO;
@@ -25,10 +23,10 @@ import org.json.simple.parser.JSONParser;
 
 
 public class AlkoMain {
-    HashMap<Product, JSONObject> vin = new HashMap<>();
-    HashMap<Product, JSONObject> ol = new HashMap<>();
-    HashMap<Product, JSONObject> sprit = new HashMap<>();
-    HashMap<Product, JSONObject> cider = new HashMap<>();
+    List<Product> vin = new ArrayList<>();
+    List<Product> ol = new ArrayList<>();
+    List<Product> cider = new ArrayList<>();
+    List<Product> sprit = new ArrayList<>();
     float lastTime = 0;
     float deltaTime = 0;
     float curSpeed = 0;
@@ -157,10 +155,10 @@ public class AlkoMain {
         removeProducts(aWindow);
 
         try {
-            vin = new HashMap<>();
-            ol = new HashMap<>();
-            cider = new HashMap<>();
-            sprit = new HashMap<>();
+            vin = new ArrayList<>();
+            ol = new ArrayList<>();
+            cider = new ArrayList<>();
+            sprit = new ArrayList<>();
             
             final Process p = new ProcessBuilder("python", "system.py").start();
             try(InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
@@ -209,22 +207,22 @@ public class AlkoMain {
                                 if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
                                     break;
 
-                                vin.put(product, object);
+                                vin.add(product);
                                 break;
 
                             case "Ol":
-                                ol.put(product, object);
+                                ol.add(product);
                                 break;
 
                             case "Cider & blanddrycker":
-                                cider.put(product, object);
+                                cider.add(product);
                                 break;
 
                             case "Sprit":
                                 if (product.getPrice() > 380)
                                     break;
 
-                                sprit.put(product, object);
+                                sprit.add(product);
                                 break;
 
                             default:
@@ -258,19 +256,19 @@ public class AlkoMain {
                     defultProduct = product;
                 switch(product.getType()){
                     case "Vin":
-                        vin.put(product, jsonObject);
+                        vin.add(product);
                         break;
 
                     case "Ol":
-                        ol.put(product, jsonObject);
+                        ol.add(product);
                         break;
 
                     case "Cider & blanddrycker":
-                        cider.put(product, jsonObject);
+                        cider.add(product);
                         break;
 
                     case "Sprit":
-                        sprit.put(product, jsonObject);
+                        sprit.add(product);
                         break;
                 }
             }
@@ -295,22 +293,13 @@ public class AlkoMain {
     }
 
     public void removeAll(Product aProduct) {
-        removeFromMap(vin, aProduct);
-        removeFromMap(ol, aProduct);
-        removeFromMap(cider, aProduct);
-        removeFromMap(sprit, aProduct);
-        /*vin.removeIf((element) -> (element.getId() == aProduct.getId()));
+
+        vin.removeIf((element) -> (element.getId() == aProduct.getId()));
         ol.removeIf((element) -> (element.getId() == aProduct.getId()));
         cider.removeIf((element) -> (element.getId() == aProduct.getId()));
-        sprit.removeIf((element) -> (element.getId() == aProduct.getId()));*/
+        sprit.removeIf((element) -> (element.getId() == aProduct.getId()));
     }
 
-    private void removeFromMap(HashMap<Product, JSONObject> map, Product aProduct){
-        for(Map.Entry<Product, JSONObject> entry : map.entrySet()){
-            if(entry.getKey().getId() == aProduct.getId())
-                vin.remove(aProduct);
-        }
-    }
 
     public Product loadProduct(JSONObject object) throws IOException {
         var name = getString(object, "name");
@@ -348,17 +337,17 @@ public class AlkoMain {
             JSONArray array = new JSONArray();
 
             FileWriter file = new FileWriter("output.json");
-            for (Map.Entry<Product, JSONObject> entry : cider.entrySet())
-                array.add(entry.getKey().getJSON());
+            for (var entry : vin)
+                array.add(entry.getJSON());
 
-            for (Map.Entry<Product, JSONObject> entry : ol.entrySet())
-                array.add(entry.getKey().getJSON());
+            for (var entry : ol)
+                array.add(entry.getJSON());
 
-            for (Map.Entry<Product, JSONObject> entry : vin.entrySet())
-                array.add(entry.getKey().getJSON());
+            for (var entry : sprit)
+                array.add(entry.getJSON());
 
-            for (Map.Entry<Product, JSONObject> entry : sprit.entrySet())
-                array.add(entry.getKey().getJSON());
+            for (var entry : cider)
+                array.add(entry.getJSON());
 
             file.write(array.toJSONString());
             file.close();
@@ -435,8 +424,7 @@ public class AlkoMain {
         List<Product> keyList;
 
         if (temp < 0.40) { //öl 40 procent chans
-            keyList = new ArrayList<>(ol.keySet());
-            Product pro = keyList.get(rand.nextInt(keyList.size()));            
+            Product pro = ol.get(rand.nextInt(ol.size()));            
             setPic(pro);
             if (pro.name.contains("Norrlands"))
                 uiProduct.setProduct(pro, rainbow);
@@ -444,20 +432,17 @@ public class AlkoMain {
                 uiProduct.setProduct(pro, blue);
         }
         else if (temp < 0.70) { //cider 30 procent chans
-            keyList = new ArrayList<>(cider.keySet());
-            Product pro = keyList.get(rand.nextInt(keyList.size()));
+            Product pro = cider.get(rand.nextInt(cider.size()));
             setPic(pro);
             uiProduct.setProduct(pro, pink);
         }
         else if (temp < 0.88) { //vin 18 procent risk
-            keyList = new ArrayList<>(vin.keySet());
-            Product pro = keyList.get(rand.nextInt(keyList.size()));
+            Product pro = vin.get(rand.nextInt(vin.size()));
             setPic(pro);
             uiProduct.setProduct(pro, red);
         }
         else { //sprit 12 procent risk
-            keyList = new ArrayList<>(sprit.keySet());
-            Product pro = keyList.get(rand.nextInt(keyList.size()));
+            Product pro = sprit.get(rand.nextInt(sprit.size()));
             setPic(pro);
             uiProduct.setProduct(pro, yellow);
         }
