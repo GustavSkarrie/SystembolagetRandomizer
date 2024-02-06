@@ -38,31 +38,29 @@ public class UIProduct {
         this.height = height;
     }
 
-    UIProduct(Product product, ImageIcon icon, Window aWindow) {
+    UIProduct(Product product, ImageIcon icon) {
         this.product = product;
         this.image = icon;
     }
 
     public void init(Window window,int x, int y, int width, int height){
-                //this.width = width;
+        this.width = width;
         this.height = height;
         background = new Picture(x, y, width, height, image);
         
         Dimension dim = background.getCenter();
         picture = new Picture(x, y, width, height, product.getImage());
         picture.setCenter((int)dim.getWidth(), (int)dim.getHeight());
-        
-        this.width = width;
-        this.height = height;
 
         window.add(picture);
         window.add(background);
 
+        this.width = width;
+        this.height = height;
     }
 
     public boolean Update (float speed) {
         move(-speed, 0);
-
         if (background.getX() < boundary) {
             move((AlkoMain.size + 10) * 20, 0);
             return true;
@@ -77,18 +75,9 @@ public class UIProduct {
 
     public void setProduct(Product product, ImageIcon icon) {
         this.product = product;
-        picture.setImage(product.getImage());
+        //picture.setImage(product.getImage());
         this.image = icon;
-        background.setImage(icon);
-
-        /* 
-        try {
-            image = ImageIO.read(new File(file));
-            background.setImage(image);
-        } catch (IOException e) {}  
-        */
-
-        //setSize(width, height);
+        //background.setImage(icon);
     }
 
     public boolean isInside(int x) {

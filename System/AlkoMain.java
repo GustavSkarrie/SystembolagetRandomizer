@@ -29,7 +29,7 @@ public class AlkoMain {
     List<Product> sprit = new ArrayList<>();
     List<UIProduct> UIVin = new ArrayList<>();
     List<UIProduct> UIOl = new ArrayList<>();
-    List<UIProduct> UIVider = new ArrayList<>();
+    List<UIProduct> UICider = new ArrayList<>();
     List<UIProduct> UISprit = new ArrayList<>();
     float lastTime = 0;
     float deltaTime = 0;
@@ -80,8 +80,6 @@ public class AlkoMain {
 
         Window window = new Window(1200, 600, "Alkohol e gott");
 
-        
-
         createButtons(window);
 
         boolean running = true;
@@ -90,6 +88,7 @@ public class AlkoMain {
 
         System.out.println("Loading init list");
         initializeLists();
+
         while(running) {
             float time = System.nanoTime();
             deltaTime = (time - lastTime) / 1000000;
@@ -118,24 +117,31 @@ public class AlkoMain {
             window.Refresh();
             lastTime = time;
         }
-    }
+    } 
 
     private void initializeLists(){
-        for(int i = 0; i < 100; i++){
+        for(int i = 0; i < 10; i++){ //ska vara på typ 100-250
+            UIOl.add(getProduct(ol, blue));
+            UICider.add(getProduct(cider, pink));
+            UIVin.add(getProduct(vin, red));
+            UISprit.add(getProduct(sprit, yellow));
+            System.out.println("InitList: "+ i + " : " + 100);
 
         }
+        System.out.println("Finished with initList");
     }
 
     private UIProduct getProduct(List<Product> list, ImageIcon image){
         Random rand = new Random();
-        UIProduct tempUIProd = new UIProduct(defultProduct, image, null);
+        UIProduct tempUIProd = new UIProduct(defultProduct, image);
         Product tempProd = list.get(rand.nextInt(list.size()));
         setPic(tempProd);
 
         if (tempProd.name.contains("Norrlands"))
             tempUIProd.setProduct(tempProd, rainbow);
-        else
+        else{
             tempUIProd.setProduct(tempProd, image);
+        }
 
         return tempUIProd;
     }
@@ -323,6 +329,10 @@ public class AlkoMain {
         ol.removeIf((element) -> (element.getId() == aProduct.getId()));
         cider.removeIf((element) -> (element.getId() == aProduct.getId()));
         sprit.removeIf((element) -> (element.getId() == aProduct.getId()));
+        UIVin.removeIf((element) -> (element.getProduct().getId() == aProduct.getId()));
+        UIOl.removeIf((element) -> (element.getProduct().getId() == aProduct.getId()));
+        UICider.removeIf((element) -> (element.getProduct().getId() == aProduct.getId()));
+        UISprit.removeIf((element) -> (element.getProduct().getId() == aProduct.getId()));
     }
 
 
@@ -396,7 +406,7 @@ public class AlkoMain {
             product.remove(aWindow);
         }
 
-        //products = new ArrayList<>();
+        products = new ArrayList<>();
     }
 
     public void roll(Window aWindow) {
@@ -418,11 +428,14 @@ public class AlkoMain {
         aWindow.add(middle);
 
         List<UIProduct> products = new ArrayList<>();
-        for (int i = 0; i < 250; i++) {
-            UIProduct product = new UIProduct(defultProduct, blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
+        for (int i = 0; i <  20; i++) {
+            UIProduct temp = getRandomProduct();
+            temp.init(aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
+            products.add(temp);
+            /*UIProduct product = new UIProduct(defultProduct, blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
             setRandom(product);
             products.add(product);
-            System.out.println(i + " : " + 250);
+            System.out.println(i + " : " + 250);*/
         }
         
 
@@ -432,12 +445,31 @@ public class AlkoMain {
         this.products = products;
     }
 
+    private UIProduct getRandomProduct(){
+        Random rand = new Random();
+        float temp = rand.nextFloat();
+        if (temp < 0.40) { //öl 40 procent chans
+            return UIOl.get(rand.nextInt(UIOl.size()));
+        }
+        else if (temp < 0.70) { //cider 30 procent chans
+            return UICider.get(rand.nextInt(UICider.size()));
+
+        }
+        else if (temp < 0.88) { //vin 18 procent risk
+            return UIVin.get(rand.nextInt(UIVin.size()));
+        }
+        else { //sprit 12 procent risk
+            return UISprit.get(rand.nextInt(UISprit.size()));
+        }
+    }
+
     private void setPic(Product product){
         try{
             var buffImage = getBuffImage(product.getJSON(), "url");
             var image = getImage(buffImage);
             product.setBufferedImage(buffImage);
             product.setImage(image);
+
         }catch(IOException e){
             System.out.println("did not find pic");
         }
