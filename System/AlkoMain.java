@@ -27,6 +27,10 @@ public class AlkoMain {
     List<Product> ol = new ArrayList<>();
     List<Product> cider = new ArrayList<>();
     List<Product> sprit = new ArrayList<>();
+    List<UIProduct> UIVin = new ArrayList<>();
+    List<UIProduct> UIOl = new ArrayList<>();
+    List<UIProduct> UIVider = new ArrayList<>();
+    List<UIProduct> UISprit = new ArrayList<>();
     float lastTime = 0;
     float deltaTime = 0;
     float curSpeed = 0;
@@ -85,6 +89,7 @@ public class AlkoMain {
         lastTime = System.nanoTime();
 
         System.out.println("Loading init list");
+        initializeLists();
         while(running) {
             float time = System.nanoTime();
             deltaTime = (time - lastTime) / 1000000;
@@ -113,6 +118,26 @@ public class AlkoMain {
             window.Refresh();
             lastTime = time;
         }
+    }
+
+    private void initializeLists(){
+        for(int i = 0; i < 100; i++){
+
+        }
+    }
+
+    private UIProduct getProduct(List<Product> list, ImageIcon image){
+        Random rand = new Random();
+        UIProduct tempUIProd = new UIProduct(defultProduct, image, null);
+        Product tempProd = list.get(rand.nextInt(list.size()));
+        setPic(tempProd);
+
+        if (tempProd.name.contains("Norrlands"))
+            tempUIProd.setProduct(tempProd, rainbow);
+        else
+            tempUIProd.setProduct(tempProd, image);
+
+        return tempUIProd;
     }
 
     private UIProduct getRandomUIProduct(){
@@ -393,7 +418,7 @@ public class AlkoMain {
         aWindow.add(middle);
 
         List<UIProduct> products = new ArrayList<>();
-        for (int i = 0; i < 250; i++) {//25 works
+        for (int i = 0; i < 250; i++) {
             UIProduct product = new UIProduct(defultProduct, blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
             setRandom(product);
             products.add(product);
@@ -421,7 +446,6 @@ public class AlkoMain {
     public void setRandom(UIProduct uiProduct) {
         Random rand = new Random();
         float temp = rand.nextFloat();
-        List<Product> keyList;
 
         if (temp < 0.40) { //öl 40 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));            
