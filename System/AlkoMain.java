@@ -129,6 +129,11 @@ public class AlkoMain {
 
         }
         System.out.println("Finished with initList");
+        System.out.println("UIOl size " + UIOl.size());
+        System.out.println("UICider size " + UICider.size());
+        System.out.println("UIVin size " + UIVin.size());
+        System.out.println("UISprit size " + UISprit.size());
+
     }
 
     private UIProduct getProduct(List<Product> list, ImageIcon image){
