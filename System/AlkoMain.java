@@ -126,7 +126,7 @@ public class AlkoMain {
         }
     }
 
-    private UIProduct getProduct(List<Product> list, ImageIcon image){
+    private UIProduct sheesh(List<Product> list, ImageIcon image){
         Random rand = new Random();
         UIProduct tempUIProd = new UIProduct(defultProduct, image, null);
         Product tempProd = list.get(rand.nextInt(list.size()));
@@ -418,7 +418,7 @@ public class AlkoMain {
         aWindow.add(middle);
 
         List<UIProduct> products = new ArrayList<>();
-        for (int i = 0; i < 250; i++) {
+        for (int i = 0; i < 25; i++) {
             UIProduct product = new UIProduct(defultProduct, blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
             setRandom(product);
             products.add(product);
@@ -447,7 +447,7 @@ public class AlkoMain {
         Random rand = new Random();
         float temp = rand.nextFloat();
 
-        if (temp < 0.40) { //öl 40 procent chans
+        if (temp < -1) { //öl 40 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));            
             setPic(pro);
             if (pro.name.contains("Norrlands"))
@@ -455,12 +455,12 @@ public class AlkoMain {
             else
                 uiProduct.setProduct(pro, blue);
         }
-        else if (temp < 0.70) { //cider 30 procent chans
+        else if (temp < -1) { //cider 30 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
             setPic(pro);
             uiProduct.setProduct(pro, pink);
         }
-        else if (temp < 0.88) { //vin 18 procent risk
+        else if (temp < -1) { //vin 18 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
             setPic(pro);
             uiProduct.setProduct(pro, red);
