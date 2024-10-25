@@ -51,6 +51,7 @@ public class AlkoMain {
     JButton rollButton;
     JButton refreshButton;
     JButton removeButton;
+    JButton onlySprit;
 
     ImageIcon blue;
     ImageIcon pink;
@@ -60,6 +61,7 @@ public class AlkoMain {
     ImageIcon line;
 
     static int size = 190;
+    boolean spriteTime = false;
 
     public static void main(String[] args) {
         System.setProperty("file.encoding", "UTF-8");
@@ -142,6 +144,7 @@ public class AlkoMain {
     }
 
     public void createButtons(Window aWindow) {
+
         rollButton = new JButton("Roll");
         rollButton.setBounds(1200 / 2 - 100, 600 / 2 + 120, 200, 70);
         rollButton.addActionListener((actionListener) -> {
@@ -153,7 +156,16 @@ public class AlkoMain {
         refreshButton.addActionListener((actionListener) -> {
             refreshData(aWindow);
         });
-
+        onlySprit = new JButton("Change to sprit only");
+        onlySprit.setBounds(10, 60, 160, 50);
+        onlySprit.addActionListener((actionListener) -> {
+            spriteTime = !spriteTime;
+            if (spriteTime)
+                onlySprit.setText("Change to everything");
+            else
+                onlySprit.setText("Change to sprit only");
+        });
+        aWindow.add(onlySprit);
         aWindow.add(rollButton);
         aWindow.add(refreshButton);
     }
@@ -276,13 +288,10 @@ public class AlkoMain {
 
         try {
             JSONArray tempArray = (JSONArray) parser.parse(new FileReader("output.json"));
-            // int i = 0;
-
+            mon.arraySize = tempArray.size();
             final int stepSize = tempArray.size() / 8;
-            int k = 1;
             for (int j = 0; j < 8; j++) {
                 final int J = j;
-
                 Future<?> future = pool.submit(() -> {
                     for (int i = J * stepSize; i < (J + 1) * stepSize; i++) {
                         JSONObject jsonObject = (JSONObject) tempArray.get(i);
@@ -309,7 +318,7 @@ public class AlkoMain {
                             }
 
                         } catch (Exception e) {
-
+                            mon.thisFucked();
                         }
                     }
                     return 0;
@@ -336,30 +345,36 @@ public class AlkoMain {
     }
 
     private class Monitor {
-        int i = 0;
         public List<Product> vin = new ArrayList<>();
         public List<Product> ol = new ArrayList<>();
         public List<Product> sprit = new ArrayList<>();
         public List<Product> cider = new ArrayList<>();
 
+        public int arraySize = 0;
+        private int i = 0;
+
         public synchronized void addVin(Product product) {
             vin.add(product);
-            System.out.println(i++);
+            System.out.println(i++ + " / " + arraySize);
         }
 
         public synchronized void addOl(Product product) {
             ol.add(product);
-            System.out.println(i++);
+            System.out.println(i++ + " / " + arraySize);
         }
 
         public synchronized void addSprit(Product product) {
             sprit.add(product);
-            System.out.println(i++);
+            System.out.println(i++ + " / " + arraySize);
         }
 
         public synchronized void addCider(Product product) {
             cider.add(product);
-            System.out.println(i++);
+            System.out.println(i++ + " / " + arraySize);
+        }
+
+        public synchronized void thisFucked() {
+            System.out.println(i++ + " / " + arraySize);
         }
 
     }
@@ -466,6 +481,7 @@ public class AlkoMain {
         Random rand = new Random();
         aWindow.removeComp(rollButton);
         aWindow.removeComp(refreshButton);
+        aWindow.removeComp(onlySprit);
 
         if (removeButton != null)
             aWindow.removeComp(removeButton);
@@ -498,6 +514,11 @@ public class AlkoMain {
     public void setRandom(UIProduct uiProduct) {
         Random rand = new Random();
         float temp = rand.nextFloat();
+        if (spriteTime) {
+            Product pro = sprit.get(rand.nextInt(sprit.size()));
+            uiProduct.setProduct(pro, yellow);
+            return;
+        }
 
         if (temp < 0.40) { // öl 40 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));
