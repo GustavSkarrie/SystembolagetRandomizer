@@ -33,7 +33,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
+import java.util.concurrent.*;
 
 public class AlkoMain {
     List<Product> vin = new ArrayList<>();
@@ -69,7 +69,7 @@ public class AlkoMain {
 
     public void run() {
         System.out.println("running");
-        //refreshData();
+        // refreshData();
         load();
 
         System.out.println("Vin: " + vin.size());
@@ -86,27 +86,25 @@ public class AlkoMain {
 
         Window window = new Window(1200, 600, "Alkohol e gott");
 
-        
-
         createButtons(window);
 
         boolean running = true;
 
         lastTime = System.nanoTime();
 
-        while(running) {
+        while (running) {
             float time = System.nanoTime();
             deltaTime = (time - lastTime) / 1000000;
 
             if (rolling) {
-                //if (timer > 0)
-                //    System.out.println("time: " + timer);
-                //System.out.println("speed: " + curSpeed);
+                // if (timer > 0)
+                // System.out.println("time: " + timer);
+                // System.out.println("speed: " + curSpeed);
 
                 timer -= deltaTime / 1000;
 
                 if (timer < 0 && curSpeed != 0)
-                    curSpeed = clamp((curSpeed - 0.0003f) / 1.0005f , 0, 100);
+                    curSpeed = clamp((curSpeed - 0.0003f) / 1.0005f, 0, 100);
 
                 if (curSpeed == 0) {
                     Product pro = getMiddle(products);
@@ -116,14 +114,14 @@ public class AlkoMain {
                     createButtons(window);
                     rolling = false;
                 }
-                    
+
                 for (UIProduct uiProduct : products) {
                     if (uiProduct.Update(curSpeed * deltaTime))
                         setRandom(uiProduct);
                 }
             }
 
-            //temp.move(1, 0);
+            // temp.move(1, 0);
             window.Refresh();
             lastTime = time;
         }
@@ -136,19 +134,25 @@ public class AlkoMain {
     public void createRemoveButton(Window aWindow) {
         removeButton = new JButton("Remove product");
         removeButton.setBounds(160 + 10, 10, 160, 50);
-        removeButton.addActionListener((actionListener) -> {removeMiddle(aWindow);});
+        removeButton.addActionListener((actionListener) -> {
+            removeMiddle(aWindow);
+        });
 
         aWindow.add(removeButton);
     }
 
     public void createButtons(Window aWindow) {
         rollButton = new JButton("Roll");
-        rollButton.setBounds(1200/2 - 100, 600/2 + 120, 200, 70);
-        rollButton.addActionListener((actionListener) -> {roll(aWindow);});
+        rollButton.setBounds(1200 / 2 - 100, 600 / 2 + 120, 200, 70);
+        rollButton.addActionListener((actionListener) -> {
+            roll(aWindow);
+        });
 
         refreshButton = new JButton("Refresh (> 1h)");
         refreshButton.setBounds(10, 10, 160, 50);
-        refreshButton.addActionListener((actionListener) -> {refreshData(aWindow);});
+        refreshButton.addActionListener((actionListener) -> {
+            refreshData(aWindow);
+        });
 
         aWindow.add(rollButton);
         aWindow.add(refreshButton);
@@ -169,29 +173,31 @@ public class AlkoMain {
             cider = new ArrayList<>();
             sprit = new ArrayList<>();
 
-            //ProcessBuilder pb = new ProcessBuilder().command("python system.py");
-            //final Process p = pb.start();
+            // ProcessBuilder pb = new ProcessBuilder().command("python system.py");
+            // final Process p = pb.start();
 
-            //Process p = Runtime.getRuntime().exec("python system.py");
-            
+            // Process p = Runtime.getRuntime().exec("python system.py");
+
             final Process p = new ProcessBuilder("python", "system.py").start();
-            try(InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
+            try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
                 int c;
-                while((c = isr.read()) >= 0) {
+                while ((c = isr.read()) >= 0) {
                     System.out.print((char) c);
                     System.out.flush();
                 }
             }
 
             /*
-            BufferedReader output = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            //BufferedReader error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-            String line = "";
-            while ((line = output.readLine()) != null) {
-                System.out.println(line);
-            }
-            */
+             * BufferedReader output = new BufferedReader(new
+             * InputStreamReader(p.getInputStream()));
+             * //BufferedReader error = new BufferedReader(new
+             * InputStreamReader(p.getErrorStream()));
+             * 
+             * String line = "";
+             * while ((line = output.readLine()) != null) {
+             * System.out.println(line);
+             * }
+             */
 
             System.out.println("Running python: " + p.isAlive());
             p.waitFor();
@@ -213,20 +219,19 @@ public class AlkoMain {
             JSONArray tempArray = (JSONArray) parser.parse(new FileReader(fileName));
             int i = 0;
 
-            for (Object o: tempArray) {
+            for (Object o : tempArray) {
                 System.out.println(i + "/" + tempArray.size());
                 i++;
 
                 JSONObject object = (JSONObject) o;
-                
                 if (!getBool(object, "isCompletelyOutOfStock") ||
-                !getBool(object, "isTemporaryOutOfStock") ||
-                LocalDate.now().isBefore(getDate(object,"productLaunchDate")) ||
-                !getString(object, "categoryLevel1").equals("Alkoholfritt")) {
+                        !getBool(object, "isTemporaryOutOfStock") ||
+                        LocalDate.now().isBefore(getDate(object, "productLaunchDate")) ||
+                        !getString(object, "categoryLevel1").equals("Alkoholfritt")) {
                     if (hasImage(object)) {
                         Product product = createProduct(object);
 
-                        switch(product.getType()){
+                        switch (product.getType()) {
                             case "Vin":
                                 if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
                                     break;
@@ -253,8 +258,9 @@ public class AlkoMain {
                                 System.out.println(product.getType());
                                 break;
                         }
-                    } 
+                    }
                 }
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -262,42 +268,100 @@ public class AlkoMain {
     }
 
     public void load() {
+        ExecutorService pool = Executors.newFixedThreadPool(8);
+        Monitor mon = new Monitor();
         JSONParser parser = new JSONParser();
+
+        ArrayList<Future<?>> tasks = new ArrayList<>();
 
         try {
             JSONArray tempArray = (JSONArray) parser.parse(new FileReader("output.json"));
-            int i = 0;
+            // int i = 0;
 
-            for (Object object : tempArray) {
-                JSONObject jsonObject = (JSONObject) object;
+            final int stepSize = tempArray.size() / 8;
+            int k = 1;
+            for (int j = 0; j < 8; j++) {
+                final int J = j;
 
-                System.out.println(i + "/" + tempArray.size());
-                i++;
+                Future<?> future = pool.submit(() -> {
+                    for (int i = J * stepSize; i < (J + 1) * stepSize; i++) {
+                        JSONObject jsonObject = (JSONObject) tempArray.get(i);
 
-                Product product = loadProduct(jsonObject);
+                        try {
+                            Product product = loadProduct(jsonObject);
 
-                switch(product.getType()){
-                    case "Vin":
-                        vin.add(product);
-                        break;
+                            switch (product.getType()) {
+                                case "Vin":
+                                    mon.addVin(product);
+                                    break;
 
-                    case "Ol":
-                        ol.add(product);
-                        break;
+                                case "Ol":
+                                    mon.addOl(product);
+                                    break;
 
-                    case "Cider & blanddrycker":
-                        cider.add(product);
-                        break;
+                                case "Cider & blanddrycker":
+                                    mon.addCider(product);
+                                    break;
 
-                    case "Sprit":
-                        sprit.add(product);
-                        break;
-                }
+                                case "Sprit":
+                                    mon.addSprit(product);
+                                    break;
+                            }
+
+                        } catch (Exception e) {
+
+                        }
+                    }
+                    return 0;
+                });
+                tasks.add(future);
             }
+            // for (Object object : tempArray) {
 
         } catch (Exception e) {
             // TODO: handle exception
         }
+        for (var a : tasks) {
+            try {
+                a.get();
+            } catch (Exception e) {
+
+            }
+        }
+
+        vin = mon.vin;
+        ol = mon.ol;
+        sprit = mon.sprit;
+        cider = mon.cider;
+    }
+
+    private class Monitor {
+        int i = 0;
+        public List<Product> vin = new ArrayList<>();
+        public List<Product> ol = new ArrayList<>();
+        public List<Product> sprit = new ArrayList<>();
+        public List<Product> cider = new ArrayList<>();
+
+        public synchronized void addVin(Product product) {
+            vin.add(product);
+            System.out.println(i++);
+        }
+
+        public synchronized void addOl(Product product) {
+            ol.add(product);
+            System.out.println(i++);
+        }
+
+        public synchronized void addSprit(Product product) {
+            sprit.add(product);
+            System.out.println(i++);
+        }
+
+        public synchronized void addCider(Product product) {
+            cider.add(product);
+            System.out.println(i++);
+        }
+
     }
 
     public void removeMiddle(Window aWindow) {
@@ -335,7 +399,7 @@ public class AlkoMain {
 
     public Product getMiddle(List<UIProduct> products) {
         for (UIProduct product : products) {
-            if (product.isInside(1200/2))
+            if (product.isInside(1200 / 2))
                 return product.getProduct();
         }
 
@@ -413,13 +477,14 @@ public class AlkoMain {
         removeButton = null;
 
         Picture middle = new Picture(600, 300, size + 20, size + 20, line);
-        middle.setCenter(1200/2, 600/2);
+        middle.setCenter(1200 / 2, 600 / 2);
         aWindow.add(middle);
 
         List<UIProduct> products = new ArrayList<>();
 
         for (int i = 0; i < 20; i++) {
-            UIProduct product = new UIProduct(ol.get(0), blue, aWindow, 2000 + (size + 10) * i, 600/2 - size/2, size, size);
+            UIProduct product = new UIProduct(ol.get(0), blue, aWindow, 2000 + (size + 10) * i, 600 / 2 - size / 2,
+                    size, size);
             setRandom(product);
             products.add(product);
         }
@@ -434,23 +499,20 @@ public class AlkoMain {
         Random rand = new Random();
         float temp = rand.nextFloat();
 
-        if (temp < 0.40) { //öl 40 procent chans
+        if (temp < 0.40) { // öl 40 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));
 
             if (pro.name.contains("Norrlands"))
                 uiProduct.setProduct(pro, rainbow);
             else
                 uiProduct.setProduct(pro, blue);
-        }
-        else if (temp < 0.70) { //cider 30 procent chans
+        } else if (temp < 0.70) { // cider 30 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
             uiProduct.setProduct(pro, pink);
-        }
-        else if (temp < 0.88) { //vin 18 procent risk
+        } else if (temp < 0.88) { // vin 18 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
             uiProduct.setProduct(pro, red);
-        }
-        else { //sprit 12 procent risk
+        } else { // sprit 12 procent risk
             Product pro = sprit.get(rand.nextInt(sprit.size()));
             uiProduct.setProduct(pro, yellow);
         }
@@ -467,11 +529,11 @@ public class AlkoMain {
         return new Product(name, price, type, id, image, buffImage, ulr);
     }
 
-    LocalDate getDate(JSONObject object,String key) {
+    LocalDate getDate(JSONObject object, String key) {
         // Sätt ihop stringen här.
-        String str = getString(object, key).substring(0,10);
+        String str = getString(object, key).substring(0, 10);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-d");
-        
+
         LocalDate d1 = LocalDate.parse(str, dtf);
         return d1;
     }
@@ -479,8 +541,7 @@ public class AlkoMain {
     double getDouble(JSONObject object, String key) {
         try {
             return ((Long) object.get(key)).doubleValue();
-        } 
-        catch (Exception e) {
+        } catch (Exception e) {
             return ((double) object.get(key));
         }
     }
@@ -495,8 +556,7 @@ public class AlkoMain {
             String temp = Normalizer.normalize(object.get(key).toString(), Normalizer.Form.NFD);
             temp = temp.replaceAll("[^\\p{ASCII}]", "");
             return temp;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return (String) object.get(key);
         }
     }
@@ -505,20 +565,21 @@ public class AlkoMain {
         JSONArray a = (JSONArray) object.get(key);
         JSONObject o = (JSONObject) a.get(0);
         URL url = new URL((String) o.get(key2) + "_400.png");
-        //System.out.println(url);
+        // System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
     }
 
     BufferedImage getBuffImage(JSONObject object, String key) throws IOException {
         URL url = new URL((String) object.get(key));
-        //System.out.println(url);
+        // System.out.println(url);
         BufferedImage c = ImageIO.read(url);
         return c;
     }
 
     ImageIcon getImage(BufferedImage buffImage) {
-        ImageIcon image = new ImageIcon(buffImage.getScaledInstance((size - 30) * buffImage.getWidth() / buffImage.getHeight(), size - 30, Image.SCALE_FAST));
+        ImageIcon image = new ImageIcon(buffImage.getScaledInstance(
+                (size - 30) * buffImage.getWidth() / buffImage.getHeight(), size - 30, Image.SCALE_FAST));
         return image;
     }
 
@@ -537,7 +598,7 @@ public class AlkoMain {
 
         if (a.size() > 0)
             return true;
-        
+
         return false;
     }
 
@@ -545,7 +606,7 @@ public class AlkoMain {
 
         try {
             BufferedImage b = ImageIO.read(new File(file));
-            return new ImageIcon(b.getScaledInstance(width, height, Image.SCALE_FAST)); 
+            return new ImageIcon(b.getScaledInstance(width, height, Image.SCALE_FAST));
         } catch (Exception e) {
             return null;
         }
