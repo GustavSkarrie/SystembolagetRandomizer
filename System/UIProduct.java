@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.SwingUtilities;
 
 public class UIProduct {
 
@@ -27,28 +28,28 @@ public class UIProduct {
         this.height = height;
         background = new Picture(x, y, width, height, icon);
 
-        /* 
-        try {
-            BufferedImage i = ImageIO.read(new File(file));
-            image = new i.getScaledInstance(190, 190, Image.SCALE_SMOOTH);
-            background = new Picture(x, y, width, height, image);
-        } catch (IOException e) {}     
-        */
-        
+        /*
+         * try {
+         * BufferedImage i = ImageIO.read(new File(file));
+         * image = new i.getScaledInstance(190, 190, Image.SCALE_SMOOTH);
+         * background = new Picture(x, y, width, height, image);
+         * } catch (IOException e) {}
+         */
+
         Dimension dim = background.getCenter();
         picture = new Picture(x, y, width, height, product.getImage());
-        picture.setCenter((int)dim.getWidth(), (int)dim.getHeight());
-        //setSize(width, height);
+        picture.setCenter((int) dim.getWidth(), (int) dim.getHeight());
+        // setSize(width, height);
 
         aWindow.add(picture);
         aWindow.add(background);
 
         this.width = width;
         this.height = height;
-        //aWindow.Refresh();
+        // aWindow.Refresh();
     }
 
-    public boolean Update (float speed) {
+    public boolean Update(float speed) {
         move(-speed, 0);
 
         if (background.getX() < boundary) {
@@ -69,14 +70,14 @@ public class UIProduct {
         this.image = icon;
         background.setImage(icon);
 
-        /* 
-        try {
-            image = ImageIO.read(new File(file));
-            background.setImage(image);
-        } catch (IOException e) {}  
-        */
+        /*
+         * try {
+         * image = ImageIO.read(new File(file));
+         * background.setImage(image);
+         * } catch (IOException e) {}
+         */
 
-        //setSize(width, height);
+        // setSize(width, height);
     }
 
     public boolean isInside(int x) {
@@ -91,9 +92,10 @@ public class UIProduct {
         this.height = height;
 
         background.setSize(width, height);
-        picture.setSize((int)((height - 30) * ((float)picture.getWidth() / (float)picture.getHeight())), height - 30);
+        picture.setSize((int) ((height - 30) * ((float) picture.getWidth() / (float) picture.getHeight())),
+                height - 30);
         Dimension dim = background.getCenter();
-        picture.setCenter((int)dim.getWidth(), (int)dim.getHeight());
+        picture.setCenter((int) dim.getWidth(), (int) dim.getHeight());
     }
 
     public void move(float x, float y) {
@@ -104,7 +106,7 @@ public class UIProduct {
     public void setPos(int x, int y) {
         background.setPosition(x, y);
         Dimension dim = background.getCenter();
-        picture.setCenter((int)dim.getWidth(), (int)dim.getHeight());
+        picture.setCenter((int) dim.getWidth(), (int) dim.getHeight());
     }
 
     public Product getProduct() {

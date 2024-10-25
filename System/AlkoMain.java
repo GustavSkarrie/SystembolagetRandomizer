@@ -281,7 +281,7 @@ public class AlkoMain {
 
     public void load() {
         ExecutorService pool = Executors.newFixedThreadPool(8);
-        Monitor mon = new Monitor();
+        Monitor mon = new Monitor(vin, ol, sprit, cider);
         JSONParser parser = new JSONParser();
 
         ArrayList<Future<?>> tasks = new ArrayList<>();
@@ -325,10 +325,7 @@ public class AlkoMain {
                 });
                 tasks.add(future);
             }
-            // for (Object object : tempArray) {
-
         } catch (Exception e) {
-            // TODO: handle exception
         }
         for (var a : tasks) {
             try {
@@ -337,21 +334,23 @@ public class AlkoMain {
 
             }
         }
-
-        vin = mon.vin;
-        ol = mon.ol;
-        sprit = mon.sprit;
-        cider = mon.cider;
     }
 
     private class Monitor {
-        public List<Product> vin = new ArrayList<>();
-        public List<Product> ol = new ArrayList<>();
-        public List<Product> sprit = new ArrayList<>();
-        public List<Product> cider = new ArrayList<>();
+        public List<Product> vin;
+        public List<Product> ol;
+        public List<Product> sprit;
+        public List<Product> cider;
 
         public int arraySize = 0;
         private int i = 0;
+
+        public Monitor(List<Product> vin, List<Product> ol, List<Product> sprit, List<Product> cider) {
+            this.vin = vin;
+            this.ol = ol;
+            this.sprit = sprit;
+            this.cider = cider;
+        }
 
         public synchronized void addVin(Product product) {
             vin.add(product);
