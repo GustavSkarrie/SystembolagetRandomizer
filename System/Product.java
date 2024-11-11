@@ -70,4 +70,16 @@ public class Product {
         int i = Integer.parseInt(id);
         return i;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Product) {
+            Product p = (Product) o;
+            //System.err.println(this.getId() == p.getId());
+
+            return this.getId() == p.getId();
+        }
+
+        return false;
+    } 
 }

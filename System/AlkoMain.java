@@ -345,6 +345,8 @@ public class AlkoMain {
         public int arraySize = 0;
         private int i = 0;
 
+        boolean removeDupes = false;
+
         public Monitor(List<Product> vin, List<Product> ol, List<Product> sprit, List<Product> cider) {
             this.vin = vin;
             this.ol = ol;
@@ -353,23 +355,43 @@ public class AlkoMain {
         }
 
         public synchronized void addVin(Product product) {
-            vin.add(product);
-            System.out.println(i++ + " / " + arraySize);
+            if (!removeDupes || !vin.contains(product)) {
+                vin.add(product);
+                System.out.println(i++ + " / " + arraySize);
+            }
+            else {
+                System.out.println(i++ + " / " + arraySize + "(removed dupe)");
+            }
         }
 
         public synchronized void addOl(Product product) {
-            ol.add(product);
-            System.out.println(i++ + " / " + arraySize);
+            if (!removeDupes ||!ol.contains(product)) {
+                ol.add(product);
+                System.out.println(i++ + " / " + arraySize);
+            }
+            else {
+                System.out.println(i++ + " / " + arraySize + "(removed dupe)");
+            }
         }
 
         public synchronized void addSprit(Product product) {
-            sprit.add(product);
-            System.out.println(i++ + " / " + arraySize);
+            if (!removeDupes ||!sprit.contains(product)) {
+                sprit.add(product);
+                System.out.println(i++ + " / " + arraySize);
+            }
+            else {
+                System.out.println(i++ + " / " + arraySize + "(removed dupe)");
+            }
         }
 
         public synchronized void addCider(Product product) {
-            cider.add(product);
-            System.out.println(i++ + " / " + arraySize);
+            if (!removeDupes ||!cider.contains(product)) {
+                cider.add(product);
+                System.out.println(i++ + " / " + arraySize);
+            }
+            else {
+                System.out.println(i++ + " / " + arraySize + "(removed dupe)");
+            }
         }
 
         public synchronized void thisFucked() {
