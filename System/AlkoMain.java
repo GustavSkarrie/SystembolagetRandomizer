@@ -358,38 +358,34 @@ public class AlkoMain {
             if (!removeDupes || !vin.contains(product)) {
                 vin.add(product);
                 System.out.println(i++ + " / " + arraySize);
-            }
-            else {
+            } else {
                 System.out.println(i++ + " / " + arraySize + "(removed dupe)");
             }
         }
 
         public synchronized void addOl(Product product) {
-            if (!removeDupes ||!ol.contains(product)) {
+            if (!removeDupes || !ol.contains(product)) {
                 ol.add(product);
                 System.out.println(i++ + " / " + arraySize);
-            }
-            else {
+            } else {
                 System.out.println(i++ + " / " + arraySize + "(removed dupe)");
             }
         }
 
         public synchronized void addSprit(Product product) {
-            if (!removeDupes ||!sprit.contains(product)) {
+            if (!removeDupes || !sprit.contains(product)) {
                 sprit.add(product);
                 System.out.println(i++ + " / " + arraySize);
-            }
-            else {
+            } else {
                 System.out.println(i++ + " / " + arraySize + "(removed dupe)");
             }
         }
 
         public synchronized void addCider(Product product) {
-            if (!removeDupes ||!cider.contains(product)) {
+            if (!removeDupes || !cider.contains(product)) {
                 cider.add(product);
                 System.out.println(i++ + " / " + arraySize);
-            }
-            else {
+            } else {
                 System.out.println(i++ + " / " + arraySize + "(removed dupe)");
             }
         }
