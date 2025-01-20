@@ -36,6 +36,8 @@ import org.json.simple.parser.ParseException;
 import java.util.concurrent.*;
 
 public class AlkoMain {
+    boolean removeRegionalRestricted = true;
+
     List<Product> vin = new ArrayList<>();
     List<Product> ol = new ArrayList<>();
     List<Product> sprit = new ArrayList<>();
@@ -236,40 +238,50 @@ public class AlkoMain {
                 i++;
 
                 JSONObject object = (JSONObject) o;
-                if (!getBool(object, "isCompletelyOutOfStock") ||
-                        !getBool(object, "isTemporaryOutOfStock") ||
-                        LocalDate.now().isBefore(getDate(object, "productLaunchDate")) ||
-                        !getString(object, "categoryLevel1").equals("Alkoholfritt")) {
+                if (!getBool(object, "isCompletelyOutOfStock") &&
+                    !getBool(object, "isTemporaryOutOfStock") &&
+                    !getBool(object, "isSupplierTemporaryNotAvailable") &&
+                    !getBool(object, "isDiscontinued") &&
+                    !getString(object, "categoryLevel1").equals("Alkoholfritt")) {
+                    
+                    if (removeRegionalRestricted && getBool(object, "isRegionalRestricted"))
+                        continue;
+
                     if (hasImage(object)) {
-                        Product product = createProduct(object);
+                        try {
+                            Product product = createProduct(object);
 
-                        switch (product.getType()) {
-                            case "Vin":
-                                if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
+                            switch (product.getType()) {
+                                case "Vin":
+                                    if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
+                                        break;
+    
+                                    vin.add(product);
                                     break;
-
-                                vin.add(product);
-                                break;
-
-                            case "Ol":
-                                ol.add(product);
-                                break;
-
-                            case "Cider & blanddrycker":
-                                cider.add(product);
-                                break;
-
-                            case "Sprit":
-                                if (product.getPrice() > 380)
+    
+                                case "Ol":
+                                    ol.add(product);
                                     break;
-
-                                sprit.add(product);
-                                break;
-
-                            default:
-                                System.out.println(product.getType());
-                                break;
+    
+                                case "Cider & blanddrycker":
+                                    cider.add(product);
+                                    break;
+    
+                                case "Sprit":
+                                    if (product.getPrice() > 380)
+                                        break;
+    
+                                    sprit.add(product);
+                                    break;
+    
+                                default:
+                                    System.out.println(product.getType());
+                                    break;
+                            }
+                        } catch (Exception e) {
+                            System.err.println("skip");
                         }
+
                     }
                 }
 
