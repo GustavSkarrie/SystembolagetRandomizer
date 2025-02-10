@@ -175,6 +175,7 @@ public class AlkoMain {
     public void refreshData(Window aWindow) {
         aWindow.removeComp(rollButton);
         aWindow.removeComp(refreshButton);
+        aWindow.removeComp(onlySprit);
 
         if (removeButton != null)
             aWindow.removeComp(removeButton);
@@ -414,6 +415,7 @@ public class AlkoMain {
         aWindow.removeComp(rollButton);
         aWindow.removeComp(refreshButton);
         aWindow.removeComp(removeButton);
+        aWindow.removeComp(onlySprit);
         removeProducts(aWindow);
 
         removeAll(product);
