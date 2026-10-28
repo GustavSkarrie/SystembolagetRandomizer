@@ -36,7 +36,7 @@ import org.json.simple.parser.ParseException;
 import java.util.concurrent.*;
 
 public class AlkoMain {
-    boolean removeRegionalRestricted = true;
+    boolean removeRegionalRestricted = false;
 
     List<Product> vin = new ArrayList<>();
     List<Product> ol = new ArrayList<>();
@@ -74,7 +74,7 @@ public class AlkoMain {
     public void run() {
         System.out.println("running");
         // refreshData();
-        load();
+        load("filtered.json", false);
 
         System.out.println("Vin: " + vin.size());
         System.out.println("Ol: " + ol.size());
@@ -188,12 +188,7 @@ public class AlkoMain {
             cider = new ArrayList<>();
             sprit = new ArrayList<>();
 
-            // ProcessBuilder pb = new ProcessBuilder().command("python system.py");
-            // final Process p = pb.start();
-
-            // Process p = Runtime.getRuntime().exec("python system.py");
-
-            final Process p = new ProcessBuilder("python", "system.py").start();
+            final Process p = new ProcessBuilder("python", "system.py").redirectErrorStream(true).start();
             try (InputStreamReader isr = new InputStreamReader(p.getInputStream())) {
                 int c;
                 while ((c = isr.read()) >= 0) {
@@ -202,21 +197,10 @@ public class AlkoMain {
                 }
             }
 
-            /*
-             * BufferedReader output = new BufferedReader(new
-             * InputStreamReader(p.getInputStream()));
-             * //BufferedReader error = new BufferedReader(new
-             * InputStreamReader(p.getErrorStream()));
-             * 
-             * String line = "";
-             * while ((line = output.readLine()) != null) {
-             * System.out.println(line);
-             * }
-             */
-
             System.out.println("Running python: " + p.isAlive());
             p.waitFor();
-            getData("data.json");
+            
+            load("data.json", true);
             saveToJSON();
             createButtons(aWindow);
 
@@ -227,72 +211,21 @@ public class AlkoMain {
 
     }
 
-    public void getData(String fileName) {
-        JSONParser parser = new JSONParser();
-
-        try {
-            JSONArray tempArray = (JSONArray) parser.parse(new FileReader(fileName));
-            int i = 0;
-
-            for (Object o : tempArray) {
-                System.out.println(i + "/" + tempArray.size());
-                i++;
-
-                JSONObject object = (JSONObject) o;
-                if (!getBool(object, "isCompletelyOutOfStock") &&
-                    !getBool(object, "isTemporaryOutOfStock") &&
-                    !getBool(object, "isSupplierTemporaryNotAvailable") &&
-                    !getBool(object, "isDiscontinued") &&
-                    !getString(object, "categoryLevel1").equals("Alkoholfritt")) {
-                    
-                    if (removeRegionalRestricted && getBool(object, "isRegionalRestricted"))
-                        continue;
-
-                    if (hasImage(object)) {
-                        try {
-                            Product product = createProduct(object);
-
-                            switch (product.getType()) {
-                                case "Vin":
-                                    if (getDouble(object, "volume") > 500 || product.getPrice() > 150)
-                                        break;
-    
-                                    vin.add(product);
-                                    break;
-    
-                                case "Ol":
-                                    ol.add(product);
-                                    break;
-    
-                                case "Cider & blanddrycker":
-                                    cider.add(product);
-                                    break;
-    
-                                case "Sprit":
-                                    if (product.getPrice() > 380)
-                                        break;
-    
-                                    sprit.add(product);
-                                    break;
-    
-                                default:
-                                    System.out.println(product.getType());
-                                    break;
-                            }
-                        } catch (Exception e) {
-                            System.err.println("skip");
-                        }
-
-                    }
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public boolean objectChecks(JSONObject object) {
+        return (!getBool(object, "isCompletelyOutOfStock") &&
+                !getBool(object, "isTemporaryOutOfStock") &&
+                !getBool(object, "isSupplierTemporaryNotAvailable") &&
+                !getBool(object, "isDiscontinued") &&
+                !getString(object, "categoryLevel1").equals("Alkoholfritt") &&
+                !(removeRegionalRestricted && getBool(object, "isRegionalRestricted")) &&
+                !(getString(object, "categoryLevel1").equals("Vin")
+                    && getDouble(object, "volume") > 350) &&
+                !(getString(object, "categoryLevel1").equals("Sprit")
+                    && getDouble(object, "price") > 350) &&
+                hasImage(object));
     }
 
-    public void load() {
+    public void load(String fileName, Boolean doChecks) {
         ExecutorService pool = Executors.newFixedThreadPool(8);
         Monitor mon = new Monitor(vin, ol, sprit, cider);
         JSONParser parser = new JSONParser();
@@ -300,7 +233,7 @@ public class AlkoMain {
         ArrayList<Future<?>> tasks = new ArrayList<>();
 
         try {
-            JSONArray tempArray = (JSONArray) parser.parse(new FileReader("output.json"));
+            JSONArray tempArray = (JSONArray) parser.parse(new FileReader(fileName));
             mon.arraySize = tempArray.size();
             final int stepSize = tempArray.size() / 8;
             for (int j = 0; j < 8; j++) {
@@ -309,8 +242,18 @@ public class AlkoMain {
                     for (int i = J * stepSize; i < (J + 1) * stepSize; i++) {
                         JSONObject jsonObject = (JSONObject) tempArray.get(i);
 
+                        if (doChecks && !objectChecks(jsonObject)) {
+                            mon.skip();
+                            continue;
+                        }
+
                         try {
-                            Product product = loadProduct(jsonObject);
+                            Product product = null;
+
+                            if (doChecks)
+                                product = createProduct(jsonObject);
+                            else
+                                product = loadProduct(jsonObject);
 
                             switch (product.getType()) {
                                 case "Vin":
@@ -331,7 +274,7 @@ public class AlkoMain {
                             }
 
                         } catch (Exception e) {
-                            mon.thisFucked();
+                            mon.error();
                         }
                     }
                     return 0;
@@ -358,7 +301,7 @@ public class AlkoMain {
         public int arraySize = 0;
         private int i = 0;
 
-        boolean removeDupes = false;
+        boolean removeDupes = true;
 
         public Monitor(List<Product> vin, List<Product> ol, List<Product> sprit, List<Product> cider) {
             this.vin = vin;
@@ -403,8 +346,12 @@ public class AlkoMain {
             }
         }
 
-        public synchronized void thisFucked() {
-            System.out.println(i++ + " / " + arraySize);
+        public synchronized void skip() {
+            System.out.println(i++ + " / " + arraySize + "(skipped)");
+        } 
+
+        public synchronized void error() {
+            System.out.println(i++ + " / " + arraySize + "(error)");
         }
 
     }
@@ -551,17 +498,17 @@ public class AlkoMain {
             return;
         }
 
-        if (temp < 0.40) { // öl 40 procent chans
+        if (temp < 0.50) { // öl 50 procent chans
             Product pro = ol.get(rand.nextInt(ol.size()));
 
             if (pro.name.contains("Norrlands"))
                 uiProduct.setProduct(pro, rainbow);
             else
                 uiProduct.setProduct(pro, blue);
-        } else if (temp < 0.70) { // cider 30 procent chans
+        } else if (temp < 0.78) { // cider 28 procent chans
             Product pro = cider.get(rand.nextInt(cider.size()));
             uiProduct.setProduct(pro, pink);
-        } else if (temp < 0.88) { // vin 18 procent risk
+        } else if (temp < 0.90) { // vin 12 procent risk
             Product pro = vin.get(rand.nextInt(vin.size()));
             uiProduct.setProduct(pro, red);
         } else { // sprit 12 procent risk

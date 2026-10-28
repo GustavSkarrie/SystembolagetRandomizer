@@ -1,6 +1,12 @@
 {
     "java.project.referencedLibraries": [
-        "lib/**/*.jar",
-        "System/json-simple-1.1.1.jar"
+        "c:\\Users\\skarr\\Documents\\GitHub\\SystembolagetRandomizer\\System\\json-simple-1.1.1.jar"
+    ],
+    "files.watcherExclude": {
+        "**/target": true
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "java.project.sourcePaths": [
+        "System"
     ]
 }
